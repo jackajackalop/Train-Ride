@@ -25,12 +25,17 @@ class seats(compartment):
 		else: vy,vx = self.rvy,self.rvx
 		slope = (vy-y1)/(vx-x1)
 		y2 = y1+(x2-x1)*slope
-		return y2
+		return int(y2)
 
 	def draw(self,surf):
 		w,h = self.width,self.height
 		surf.fill(self.color)
 		couchBase = super().colorChange(30)
+		otherWall = super().colorChange(-20)
+		pygame.draw.rect(surf,otherWall,(0,0,w*2/3+20,h))
+		shadow = super().colorChange(-35)
+		pygame.draw.rect(surf,shadow,(w/2+40,self.perspective('l',w,h*.95,w/2),
+										w,h))
 		pygame.draw.polygon(surf,couchBase,[[w*2/3,h*.4], 
 								[w,self.perspective('l',w*2/3,h*.4,w)],
 								[w,h*.8], 
@@ -41,10 +46,10 @@ class seats(compartment):
 							[w,self.perspective('l',w*2/3,
 									self.perspective('l',w,h*3/4,w*2/3),w)],
 							[w,h*.95], 
-							[w/2,self.perspective('r',w*2/3,h*3/4,w/2)]])
+							[w/2,self.perspective('l',w,h*.95,w/2)]])
 		pygame.draw.polygon(surf,couchBase,
-							[[w/2,self.perspective('r',w*2/3,h*3/4,w/2)],
-							[w/2,self.perspective('r',w*2/3,h*3/4,w/2)+h/15],
-							[w*.9,self.perspective('l',w/2,
-								self.perspective('r',w*2/3,h*3/4,w/2)+h/10,w*.9)],
-							[w,h],[w,h*.95]])
+							[[w/2,self.perspective('l',w,h*.95,w/2)],
+							[w/2,self.perspective('l',w,h*.95,w/2)+h*.04],
+							[w,self.perspective('l',w/2,
+								self.perspective('l',w,h*.95,w/2)+h*.04,w)],
+							[w,h*.95]])
