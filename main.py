@@ -2,22 +2,26 @@ import pygame
 import scene
 
 #framework referenced from blog.lukasperaza.com and hermit 
+#code for taking commands taken from hermit
 
-
-def trainStart(width=1500,height=1000):
+def trainStart(width=1200,height=900):
 	def draw():
 		screen.fill((255,255,255))
 		seats.draw(canvas)
+		windowFrame.draw(window)
 		screen.blit(canvas,(0,0))
+		screen.blit(window,(0,0))
 	pygame.init()
 	screen = pygame.display.set_mode((width,height))
 	canvas= pygame.Surface((width,height))
+	window = pygame.Surface((width*2/3,height*2/3))
 	pygame.display.set_caption("choo-choo")
 	clock = pygame.time.Clock()
 	running = True
-
-	seats = scene.seats(1500,1000)
-
+	commandlist = ["set time","set month","set speed"]
+	color = (255,210,170)
+	seats = scene.seats(width,height,color)
+	windowFrame = scene.frame(width,height,color)
 	while running:
 		for event in pygame.event.get():
 			if(event.type == pygame.QUIT):
