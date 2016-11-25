@@ -6,7 +6,7 @@ class compartment(object):
 		self.height = height
 		self.color = color
 		self.lvx,self.lvy = -.25*width,.6*height#left vanishing point for 2pt perspective
-		self.rvx,self.rvy = 2.5*width,.6*height#left vanishing point for 2pt perspective
+		self.rvx,self.rvy = 4.5*width,.6*height#left vanishing point for 2pt perspective
 
 	def shake(self):
 		pass
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 	screen = pygame.display.set_mode((width,height))
 	canvas= pygame.Surface((width,height))
 	window =pygame.Surface((width*2/3,height*2/3))
-	pygame.display.set_caption("choo-choo")
+	pygame.display.set_caption("basic scene")
 	seat = seats(width,height,(255,210,170))
 	frame = frame(width,height,(255,210,170))
 	running = True

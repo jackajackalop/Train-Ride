@@ -1,0 +1,20 @@
+import pygame
+
+class trees(object):
+	def __init__(self,surf,color,location,size):
+		pass
+
+if __name__ == "main":
+	width,height = 800,600
+	pygame.init()
+	screen = pygame.display.set_mode((width,height))
+	pygame.display.set_caption("happy little trees :DDDD")
+	running = True
+	while running:
+		for event in pygame.event.get():
+			if(event.type == pygame.QUIT):
+				running = False
+		# test.draw(screen)
+		pygame.display.flip()
+		# screen.blit(canvas,(0,0))
+	pygame.quit()
