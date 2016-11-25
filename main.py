@@ -8,7 +8,9 @@ def trainStart(width=1200,height=900):
 	def draw():
 		screen.fill((255,255,255))
 		seats.draw(canvas)
-		scenery.draw(window)
+		sceneryBase.draw(window)
+		plains.draw(window)
+		river.draw(window)
 		windowFrame.draw(window)
 		screen.blit(canvas,(0,0))
 		screen.blit(window,(0,0))
@@ -24,7 +26,9 @@ def trainStart(width=1200,height=900):
 	color = (255,210,170)
 	seats = scene.seats(width,height,color)
 	windowFrame = scene.frame(width,height,color)
-	scenery = landscape.plain(width*2/3,height*2/3,0,"clear")
+	sceneryBase = landscape.land(width*2/3,height*2/3, 0,"clear")
+	plains = landscape.plain(width*2/3,height*2/3,0,"clear")
+	river = landscape.river(width*2/3,height*2/3,0,"clear",2)
 	while running:
 		for event in pygame.event.get():
 			if(event.type == pygame.QUIT):
