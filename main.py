@@ -11,9 +11,11 @@ def trainStart(width=1600,height=1200):
 		screen.fill((255,255,255))
 		seats.draw(canvas)
 		sceneryBase.draw(window)
-		mountains.draw(window)
+		if(start and "mountain" in currentInfo[0]):
+			mountains.draw(window)
 		plains.draw(window)
-		river.draw(window)
+		if(start and "river" in currentInfo[0]):
+			river.draw(window)
 		windowFrame.draw(window)
 		screen.blit(canvas,(0,0))
 		screen.blit(window,(0,0))
@@ -80,6 +82,16 @@ def trainStart(width=1600,height=1200):
 				if(executed):
 					executed=False
 					inputs = ""
+				elif(not showConsole and key == "r"):
+					inputs = ""
+					executed = False
+					speed = 0
+					start,end=False,False
+					startLoc,endLoc = "",""
+					currentInfo = []
+					geoKW =[]
+					tempKW = []
+					climateKW=[]
 				elif(key == "right" or key== "up"):
 					plains.changeSpeed(1)
 					river.changeSpeed(1)
@@ -104,13 +116,21 @@ def trainStart(width=1600,height=1200):
 					if(key == "return" and len(inputs)>0):
 						if(not start):
 							startLoc = inputs
-							start=True
-							inputs = "Start location saved! :D"
+							currentInfo = webscrape.infoGrab(startLoc)
+							print(currentInfo)
+							if(currentInfo==None):
+								inputs = "Not available location :("
+							else:
+								start=True
+								inputs = "Start location saved! :D"
 						elif(not end):
 							endLoc = inputs
-							end = True
-							inputs = "End location saved! :D"
-							webscrape.infoGrab(startLoc)
+							endInfo = webscrape.infoGrab(endLoc)
+							if(endInfo==None):
+								inputs = "Not available location :("
+							else:
+								end = True
+								inputs = "End location saved! :D"
 						else:
 							inputs = str(exeCommand(str(inputs)))
 						executed = True

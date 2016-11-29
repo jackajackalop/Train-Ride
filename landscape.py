@@ -138,7 +138,7 @@ class mountains(land):
 		widthMargin = self.width//(2*number)
 		y = (self.height*3/4)//(self.size+.5)
 		heightMargin = ((self.height*3/4)-y)//5
-		previousHeight = y
+		previousHeight = y #TODO generate by angle instead of height
 		for mountains in range(times):
 			h = int(start+space*mountains)
 			h1 = random.randint(h,h+widthMargin)
