@@ -1,5 +1,6 @@
 import pygame
 import scene, landscape
+import webscrape
 
 
 #framework referenced from blog.lukasperaza.com and hermit 
@@ -26,9 +27,6 @@ def trainStart(width=1600,height=1200):
 			text = font.render(":"+input,False,(150,150,150))
 			screen.blit(text,[width*.02,height*.91])
 
-	def infoGrab():
-		pass
-
 	def exeCommand(command):
 		failed = "Not Executed! :("
 		noSpace = command.split()
@@ -49,12 +47,15 @@ def trainStart(width=1600,height=1200):
 	showConsole = False
 	commandlist = {"set time","set month","set speed"}
 
-	color = (140,160,160)
+	color = (120,130,130)
 	inputs = ""
 	executed = False
 	speed = 0
 	start,end=False,False
 	startLoc,endLoc = "",""
+	geoKW =[]
+	tempKW = []
+	climateKW=[]
 	
 	canvas= pygame.Surface((width,height))
 	window = pygame.Surface((width*2/3,height*2/3))
@@ -100,7 +101,7 @@ def trainStart(width=1600,height=1200):
 							inputs+=key
 						elif(key == "backspace" and len(inputs)>0):
 							inputs=inputs[:-1]
-					if(key == "return"):
+					if(key == "return" and len(inputs)>0):
 						if(not start):
 							startLoc = inputs
 							start=True
@@ -109,7 +110,7 @@ def trainStart(width=1600,height=1200):
 							endLoc = inputs
 							end = True
 							inputs = "End location saved! :D"
-							infoGrab()
+							webscrape.infoGrab(startLoc)
 						else:
 							inputs = str(exeCommand(str(inputs)))
 						executed = True
