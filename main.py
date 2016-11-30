@@ -9,12 +9,14 @@ import webscrape,webscrape2
 def trainStart(width=1600,height=1200):
 	def draw():
 		screen.fill((255,255,255))
+		canvas.fill((255,255,255))
 		seats.draw(canvas)
 		sceneryBase.draw(window)
-		if(start and "mountain" in currentInfo):
+		print(currentInfo)
+		if(start and end and "mountain" in currentInfo):
 			mountains.draw(window)
 		plains.draw(window)
-		if(start and "river" in currentInfo):
+		if(start and end and "river" in currentInfo):
 			river.draw(window)
 		windowFrame.draw(window)
 		screen.blit(canvas,(0,0))
@@ -28,6 +30,17 @@ def trainStart(width=1600,height=1200):
 			input = "".join(inputs)
 			text = font.render(":"+input,False,(150,150,150))
 			screen.blit(text,[width*.02,height*.91])
+
+	def statusUpdate():
+		nonlocal step,currentInfo,times
+		if(start and end):
+			distance = mph*(pygame.time.get_ticks()-times[-1])/1000#/60
+			if(distance>=travelInfo['legs']['steps'][step]['distance']['value']):
+				currentInfo = webscrape2.surroundings(travelInfo['legs']['steps'][step]['end_location'])
+				times.append(pygame.time.get_ticks())
+				step+=1
+				print(step,currentInfo,travelInfo['legs']['steps'][step]['end_location'])
+			# print(distance)
 
 	def exeCommand(command):
 		failed = "Not Executed! :("
@@ -52,8 +65,9 @@ def trainStart(width=1600,height=1200):
 	color = (120,130,130)
 	inputs = ""
 	executed = False
+	step = 0
 	speed = 0
-	mph = 50
+	mph = 500
 	start,end=False,False
 	startLoc,endLoc = "",""
 	travelInfo={}
@@ -94,13 +108,13 @@ def trainStart(width=1600,height=1200):
 					climateKW=[]
 				elif((key == "right" or key== "up") and abs(speed)<=5):
 					speed+=1
-					mph+=10
+					mph+=100
 					plains.changeSpeed(1)
 					river.changeSpeed(1)
 					mountains.changeSpeed(1)
 				elif((key == "left" or key == "down")and abs(speed)<=5):
 					speed-=1
-					mph-=10
+					mph-=100
 					plains.changeSpeed(-1)
 					river.changeSpeed(-1)
 					mountains.changeSpeed(-1)
@@ -123,6 +137,7 @@ def trainStart(width=1600,height=1200):
 							check = webscrape2.checkLocation(startLoc)
 							if(check==None):
 								inputs = "Not available location :("
+								startLoc=""
 							else:
 								start=True
 								inputs = "Start location saved! :D"
@@ -131,9 +146,12 @@ def trainStart(width=1600,height=1200):
 							check = webscrape2.checkLocation(endLoc)
 							travelInfo,currentInfo=webscrape2.infoGet(startLoc,
 																		endLoc)
-							if(check==None):
+							if(check==None or travelInfo==None):
 								inputs = "Not available location :("
+								start=False
+								endLoc=""
 							else:
+								times = [pygame.time.get_ticks()]
 								end = True
 								inputs = "End location saved! :D"
 						else:
@@ -144,6 +162,7 @@ def trainStart(width=1600,height=1200):
 		drawConsole()
 		pygame.display.flip()
 		clock.tick()
+		statusUpdate()
 	pygame.quit()
 
 

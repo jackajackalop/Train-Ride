@@ -4,7 +4,7 @@ import googlemaps
 import googleplaces
 
 def checkLocation(loc):
-	gmaps = googleplaces.GooglePlaces('AIzaSyDOeC7TACKWVdETAYVSGiRLZYQn6673wh4')
+	gmaps = googleplaces.GooglePlaces('AIzaSyDVfV_V7nCQ9Dt4BHdcQTmBDbjdODEUuCo')
 	try:
 		info = gmaps.nearby_search(location=loc)
 		return True
@@ -18,7 +18,7 @@ def steps(info):
 	return sectionInfo
 
 def infoParse(info): #turns json list into dictionary
-	keep = {"distance","duration","legs","steps","start_location","end_location","lat","lng","text"}
+	keep = {"distance","duration","legs","steps","start_location","end_location","lat","lng","text","value"}
 	parsed = {}
 	if(not isinstance(info,list) and not isinstance(info,dict)):
 		return info
@@ -35,16 +35,19 @@ def infoParse(info): #turns json list into dictionary
 	return parsed
 
 def infoGet(start,end): #used https://github.com/googlemaps/google-maps-services-python/blob/master/README.md
-	gmaps = googlemaps.Client(key ='AIzaSyDOeC7TACKWVdETAYVSGiRLZYQn6673wh4')
-	response = gmaps.directions(start,end)[0]
-	infoDict = infoParse(response)
-	return infoDict,surroundings(infoDict["legs"]["start_location"])
+	gmaps = googlemaps.Client(key ='AIzaSyDVfV_V7nCQ9Dt4BHdcQTmBDbjdODEUuCo')
+	try:
+		response = gmaps.directions(start,end)[0]
+		infoDict = infoParse(response)
+		# print(infoDict['legs']['steps'][0])
+		return infoDict,surroundings(infoDict["legs"]["start_location"])
+	except: return None,None
 
 def surroundings(loc):
 	#referenced https://github.com/slimkrazy/python-google-places
 	geoTerms = ["river","mountain","mountains","plains","hills","lake","woods","forest"]
 	found = []
-	gmaps = googleplaces.GooglePlaces('AIzaSyDOeC7TACKWVdETAYVSGiRLZYQn6673wh4')
+	gmaps = googleplaces.GooglePlaces('AIzaSyDVfV_V7nCQ9Dt4BHdcQTmBDbjdODEUuCo')
 	info = gmaps.nearby_search(lat_lng=loc,radius=5000,types=["natural_feature"])
 	for place in info.places:
 		place.get_details()
@@ -55,6 +58,6 @@ def surroundings(loc):
 
  
 if __name__ == '__main__':
-	print(infoGet("denver","houston"))
-	print(surroundings({'lng': -104.9902503, 'lat': 39.7392353}))
+	print(infoGet("duquesne","houston"))
+	# print(surroundings({'lng': -104.9902503, 'lat': 39.7392353}))
 
