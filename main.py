@@ -1,6 +1,6 @@
 import pygame
 import scene, landscape
-import webscrape
+import webscrape,webscrape2
 
 
 #framework referenced from blog.lukasperaza.com and hermit 
@@ -11,10 +11,10 @@ def trainStart(width=1600,height=1200):
 		screen.fill((255,255,255))
 		seats.draw(canvas)
 		sceneryBase.draw(window)
-		if(start and "mountain" in currentInfo[0]):
+		if(start and "mountain" in currentInfo):
 			mountains.draw(window)
 		plains.draw(window)
-		if(start and "river" in currentInfo[0]):
+		if(start and "river" in currentInfo):
 			river.draw(window)
 		windowFrame.draw(window)
 		screen.blit(canvas,(0,0))
@@ -53,11 +53,11 @@ def trainStart(width=1600,height=1200):
 	inputs = ""
 	executed = False
 	speed = 0
+	mph = 50
 	start,end=False,False
 	startLoc,endLoc = "",""
-	geoKW =[]
-	tempKW = []
-	climateKW=[]
+	travelInfo={}
+	currentInfo={}
 	
 	canvas= pygame.Surface((width,height))
 	window = pygame.Surface((width*2/3,height*2/3))
@@ -88,15 +88,19 @@ def trainStart(width=1600,height=1200):
 					speed = 0
 					start,end=False,False
 					startLoc,endLoc = "",""
-					currentInfo = []
+					currentInfo = {}
 					geoKW =[]
 					tempKW = []
 					climateKW=[]
-				elif(key == "right" or key== "up"):
+				elif((key == "right" or key== "up") and abs(speed)<=5):
+					speed+=1
+					mph+=10
 					plains.changeSpeed(1)
 					river.changeSpeed(1)
 					mountains.changeSpeed(1)
-				elif(key == "left" or key == "down"):
+				elif((key == "left" or key == "down")and abs(speed)<=5):
+					speed-=1
+					mph-=10
 					plains.changeSpeed(-1)
 					river.changeSpeed(-1)
 					mountains.changeSpeed(-1)
@@ -116,17 +120,18 @@ def trainStart(width=1600,height=1200):
 					if(key == "return" and len(inputs)>0):
 						if(not start):
 							startLoc = inputs
-							currentInfo = webscrape.infoGrab(startLoc)
-							print(currentInfo)
-							if(currentInfo==None):
+							check = webscrape2.checkLocation(startLoc)
+							if(check==None):
 								inputs = "Not available location :("
 							else:
 								start=True
 								inputs = "Start location saved! :D"
 						elif(not end):
 							endLoc = inputs
-							endInfo = webscrape.infoGrab(endLoc)
-							if(endInfo==None):
+							check = webscrape2.checkLocation(endLoc)
+							travelInfo,currentInfo=webscrape2.infoGet(startLoc,
+																		endLoc)
+							if(check==None):
 								inputs = "Not available location :("
 							else:
 								end = True

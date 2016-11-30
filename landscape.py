@@ -16,8 +16,7 @@ class land(object):
 		self.hueShift = (0,0,0)
 
 	def changeSpeed(self,x):
-		if(abs(self.speed+x)<=5):
-			self.speed+=x
+		self.speed+=x
 
 
 	@staticmethod

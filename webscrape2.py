@@ -1,39 +1,60 @@
-# AIzaSyDjlO8TQYdtE9IbR90pdPm9vfSlL32hxmM
 import json
 import googlemaps
+# from googleplaces import GooglePlaces, types, lang
+import googleplaces
+
+def checkLocation(loc):
+	gmaps = googleplaces.GooglePlaces('AIzaSyDOeC7TACKWVdETAYVSGiRLZYQn6673wh4')
+	try:
+		info = gmaps.nearby_search(location=loc)
+		return True
+	except:
+		return None
+
+def steps(info):
+	sectionInfo = []
+	for step in info:
+		sectionInfo.append(infoParse(step))
+	return sectionInfo
 
 def infoParse(info): #turns json list into dictionary
-	keep = {"distance","duration","legs","steps","start_location","end_location"}
-	if(len(info)==0):
-		print("info",info)
+	keep = {"distance","duration","legs","steps","start_location","end_location","lat","lng","text"}
+	parsed = {}
+	if(not isinstance(info,list) and not isinstance(info,dict)):
 		return info
 	else:
 		for element in info:
 			if(element in keep):
-				if(isinstance(info[element],list) and len(info[element])>0):
-					print(info[element][0])
-					return infoParse(info[element][0]) 
-				elif(isinstance(info[element],dict)):
-					print(info[element])
-					return infoParse(info[element])
+				if(isinstance(info[element],list)):
+					if(element=="steps"):
+						parsed[element] = steps(info[element])
+					else:
+						parsed[element] = infoParse(info[element][0])
+				else:
+					parsed[element]=infoParse(info[element])
+	return parsed
 
 def infoGet(start,end): #used https://github.com/googlemaps/google-maps-services-python/blob/master/README.md
-	gmaps = googlemaps.Client(key ='AIzaSyDjlO8TQYdtE9IbR90pdPm9vfSlL32hxmM')
-	response = gmaps.directions(start,end)
-	formattedDump(response)
-	response= json.dumps(response, sort_keys=True, indent=4)
-	response = json.loads(response)[0]
-	# for element in response:
-	# 	print(element)
-	# 	if(isinstance(response[element],list) and len(response[element])>0):
-	# 		response[element] = (response[element][0])
-	# 		# print(response[element])
-	# 		print(response[element])
-	# return (response['legs']['duration'])
-	return infoParse(response)
+	gmaps = googlemaps.Client(key ='AIzaSyDOeC7TACKWVdETAYVSGiRLZYQn6673wh4')
+	response = gmaps.directions(start,end)[0]
+	infoDict = infoParse(response)
+	return infoDict,surroundings(infoDict["legs"]["start_location"])
 
-def formattedDump(response):
-	print(json.dumps(response, sort_keys=True, indent=4),"AAAAAAAAAAAAAAA")
+def surroundings(loc):
+	#referenced https://github.com/slimkrazy/python-google-places
+	geoTerms = ["river","mountain","mountains","plains","hills","lake","woods","forest"]
+	found = []
+	gmaps = googleplaces.GooglePlaces('AIzaSyDOeC7TACKWVdETAYVSGiRLZYQn6673wh4')
+	info = gmaps.nearby_search(lat_lng=loc,radius=5000,types=["natural_feature"])
+	for place in info.places:
+		place.get_details()
+		for term in geoTerms:
+			if(term in place.name.lower()):
+				found.append(term)
+	return set(found)
 
+ 
+if __name__ == '__main__':
+	print(infoGet("denver","houston"))
+	print(surroundings({'lng': -104.9902503, 'lat': 39.7392353}))
 
-print(infoGet("chicago", "pittsburgh"))
