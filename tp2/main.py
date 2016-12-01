@@ -11,23 +11,13 @@ def trainStart(width=1600,height=1200):
 		screen.fill((255,255,255))
 		canvas.fill((255,255,255))
 		seats.draw(canvas)
-		if(start and end):
-			if("desert" in currentInfo):
-				desert.draw(window)
-			else:
-				sceneryBase.draw(window)
-				if("plains" in currentInfo):
-					plains.draw(window)
-			if("mountain" in currentInfo):
-				mountains.draw(window)
-			if("hills" in currentInfo):
-				hills.draw(window)
-			if("river" in currentInfo):
-				river.draw(window)
-		else:
-			sceneryBase.draw(window)
-			plains.draw(window)
-		# print(currentInfo)
+		sceneryBase.draw(window)
+		print(currentInfo)
+		if(start and end and "mountain" in currentInfo):
+			mountains.draw(window)
+		plains.draw(window)
+		if(start and end and "river" in currentInfo):
+			river.draw(window)
 		windowFrame.draw(window)
 		screen.blit(canvas,(0,0))
 		screen.blit(window,(0,0))
@@ -41,15 +31,15 @@ def trainStart(width=1600,height=1200):
 			text = font.render(":"+input,False,(150,150,150))
 			screen.blit(text,[width*.02,height*.91])
 
-	# def statusUpdate():
-	# 	nonlocal step,currentInfo,times
-	# 	if(start and end):
-	# 		distance = mph*(pygame.time.get_ticks()-times[-1])/1000/60
-	# 		if(distance>=travelInfo['legs']['steps'][step]['distance']['value']):
-	# 			currentInfo = webscrape2.surroundings(travelInfo['legs']['steps'][step]['end_location'])
-	# 			times.append(pygame.time.get_ticks())
-	# 			step+=1
-	# 			print(step,currentInfo,travelInfo['legs']['steps'][step]['end_location'])
+	def statusUpdate():
+		nonlocal step,currentInfo,times
+		if(start and end):
+			distance = mph*(pygame.time.get_ticks()-times[-1])/1000#/60
+			if(distance>=travelInfo['legs']['steps'][step]['distance']['value']):
+				currentInfo = webscrape2.surroundings(travelInfo['legs']['steps'][step]['end_location'])
+				times.append(pygame.time.get_ticks())
+				step+=1
+				print(step,currentInfo,travelInfo['legs']['steps'][step]['end_location'])
 			# print(distance)
 
 	def exeCommand(command):
@@ -95,8 +85,6 @@ def trainStart(width=1600,height=1200):
 	plains = landscape.plain(width*2/3,height*2/3,0,"clear")
 	river = landscape.river(width*2/3,height*2/3,0,"clear",2)
 	mountains = landscape.mountains(width*2/3,height*2/3,0,"clear",1)
-	desert = landscape.desert(width*2/3,height*2/3,0,'clear')
-	hills = landscape.hills(width*2/3,height*2/3,0,'clear')
 
 	while(running):
 		if(not start or not end): showConsole=True
@@ -118,18 +106,18 @@ def trainStart(width=1600,height=1200):
 					geoKW =[]
 					tempKW = []
 					climateKW=[]
-				elif((key == "right" or key== "up") and abs(speed+10)<=50):
-					speed+=10
-					mph+=1000
-					plains.changeSpeed(10)
-					river.changeSpeed(10)
-					mountains.changeSpeed(10)
-				elif((key == "left" or key == "down")and (speed-10)>=0):
-					speed-=10
-					mph-=1000
-					plains.changeSpeed(-10)
-					river.changeSpeed(-10)
-					mountains.changeSpeed(-10)
+				elif((key == "right" or key== "up") and abs(speed)<=5):
+					speed+=1
+					mph+=100
+					plains.changeSpeed(1)
+					river.changeSpeed(1)
+					mountains.changeSpeed(1)
+				elif((key == "left" or key == "down")and abs(speed)<=5):
+					speed-=1
+					mph-=100
+					plains.changeSpeed(-1)
+					river.changeSpeed(-1)
+					mountains.changeSpeed(-1)
 				elif(key == "/"):
 					showConsole = not showConsole
 					inputs = ""
@@ -146,29 +134,26 @@ def trainStart(width=1600,height=1200):
 					if(key == "return" and len(inputs)>0):
 						if(not start):
 							startLoc = inputs
-							# check = webscrape2.checkLocation(startLoc)
-							# if(check==None):
-							# 	inputs = "Not available location :("
-							# 	startLoc=""
-							# else:
-							start=True
-							end=True#testing
-							inputs = "Start location saved! :D"
-						# elif(not end):
-						# 	endLoc = inputs
-							# check = webscrape2.checkLocation(endLoc)
-							# travelInfo,currentInfo=webscrape2.infoGet(startLoc,
-																		# endLoc)
-							currentInfo = webscrape.infoGrab(startLoc) #testing
-							print(currentInfo)
-							# if(check==None or travelInfo==None):
-							# 	inputs = "Not available location :("
-							# 	start=False
-							# 	endLoc=""
-							# else:
-							# 	times = [pygame.time.get_ticks()]
-							# 	end = True
-							# 	inputs = "End location saved! :D"
+							check = webscrape2.checkLocation(startLoc)
+							if(check==None):
+								inputs = "Not available location :("
+								startLoc=""
+							else:
+								start=True
+								inputs = "Start location saved! :D"
+						elif(not end):
+							endLoc = inputs
+							check = webscrape2.checkLocation(endLoc)
+							travelInfo,currentInfo=webscrape2.infoGet(startLoc,
+																		endLoc)
+							if(check==None or travelInfo==None):
+								inputs = "Not available location :("
+								start=False
+								endLoc=""
+							else:
+								times = [pygame.time.get_ticks()]
+								end = True
+								inputs = "End location saved! :D"
 						else:
 							inputs = str(exeCommand(str(inputs)))
 						executed = True
@@ -177,7 +162,7 @@ def trainStart(width=1600,height=1200):
 		drawConsole()
 		pygame.display.flip()
 		clock.tick()
-		# statusUpdate()
+		statusUpdate()
 	pygame.quit()
 
 

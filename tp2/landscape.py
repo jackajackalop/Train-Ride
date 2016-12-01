@@ -1,5 +1,5 @@
 import pygame
-import random, math
+import random
 
 class land(object):
 	def __init__(self,width,height,temp,weather):
@@ -54,13 +54,13 @@ class plain(land):
 	def __init__(self,width,height,temp,weather):
 		super().__init__(width,height,temp,weather)
 		self.far = []
-		self.farTreesColor = super().atmosphericPersp(self.grass,2)
+		self.farTreesColor = super().atmosphericPersp(self.grass,3)
 		self.farPts=50
 		self.farSpace = self.width/self.farPts
 		self.farTreesPts(0,self.farPts+2)
 		self.farTime = 30
 		self.mid = []
-
+	#TODO draw more ahead of train
 	def farTreesPts(self,start,times):
 		w,h = self.width,self.height
 		for bump in range(times):
@@ -72,7 +72,7 @@ class plain(land):
 	def draw(self,surf):
 		self.far=super().animate(surf,
 						self.far,self.farTreesColor,self.farSpace,self.farTime)
-		if(self.far[0][0]<0-self.farSpace):
+		if(self.timeDelay%self.farTime==0):
 			self.far.pop(0)
 			del self.far[-2:]
 			self.farTreesPts(self.width+self.farSpace,1)
@@ -87,7 +87,7 @@ class river(land):
 		self.riverTime = 10*(distance+1)
 		self.riverColor = (100,100,150)
 		self.riverPoints(0,self.riverPts+2)
-
+	#TODO draw more ahead
 	def riverPoints(self,start,times):
 		w,h = self.width,self.height
 		h1 =h-h*self.distance//12
@@ -107,7 +107,7 @@ class river(land):
 	def draw(self,surf):
 		self.river=super().animate(surf,self.river,self.riverColor
 									,self.riverSpace,self.riverTime)
-		if(self.river[0][0]<0-self.riverSpace):
+		if(self.timeDelay%self.riverTime==0):
 			self.river.pop(0)
 			self.river.pop(-2)
 			self.riverPoints(self.width+self.riverSpace,1)
@@ -121,7 +121,7 @@ class mountains(land):
 		self.mtNumber = random.randint(3,5)
 		self.BNumber = self.mtNumber-2
 		self.mountainSpaceF = self.width//self.mtNumber
-		self.mountainSpaceB = self.width//self.BNumber
+		self.mountainSpaceB = self.width//(self.mtNumber-2)
 		self.mountainTime = 800
 		self.BSplits = []
 		self.FSplits = []
@@ -136,7 +136,7 @@ class mountains(land):
 		widthMargin = self.width//(2*number)
 		y = (self.height*3/4)//(self.size+.5)
 		heightMargin = ((self.height*3/4)-y)//5
-		previousHeight = y 
+		previousHeight = y #TODO generate by angle instead of height
 		for mountains in range(times):
 			h = int(start+space*mountains)
 			h1 = random.randint(h,h+widthMargin)
@@ -157,86 +157,31 @@ class mountains(land):
 		pts.append([h2,self.height*3/4])
 		pts.append([0,self.height*3/4])
 		return pts,splits
-
+	#TODO removes mountain based on h1, but should be based on h2
 	def draw(self,surf):
 		self.mountainsB=super().animate(surf,self.mountainsB,
 			self.farColor,self.mountainSpaceB,self.mountainTime*3)
 		self.timeDelay-=1
 		self.mountainsF=super().animate(surf,self.mountainsF,
 			self.color,self.mountainSpaceF,self.mountainTime)
-		if(self.mountainsF[self.mtNumber+1][0]<0-self.mountainSpaceF):
-			self.FSplits.pop(0)
-			del self.mountainsF[-2:]
-			del self.mountainsF[:self.FSplits[0]]
-			self.mountainPts(self.mountainsF,self.FSplits,self.mtNumber,
-						self.mountainSpaceF,self.width+self.mountainSpaceF,1)
-		if(self.mountainsB[self.BNumber+1][0]<0-self.mountainSpaceB):
+		if(self.timeDelay%(self.mountainTime*3)==0):
 			del self.mountainsB[:self.BSplits[0]]
 			self.BSplits.pop(0)
 			del self.mountainsB[-2:]
 			self.mountainPts(self.mountainsB,self.BSplits,self.BNumber,
 						self.mountainSpaceB,self.width+self.mountainSpaceB,1)
+		if(self.timeDelay%self.mountainTime==0):
+			self.FSplits.pop(0)
+			del self.mountainsF[-2:]
+			del self.mountainsF[:self.FSplits[0]]
+			self.mountainPts(self.mountainsF,self.FSplits,self.mtNumber,
+						self.mountainSpaceF,self.width+self.mountainSpaceF,1)
 
-class desert(land):
-	def __init__(self,width,height,temp,weather):
-		super().__init__(width,height,temp,weather)
-		self.grass = (180,150,90)
 
 class hills(land):
-	def __init__(self,width,height,temp,weather):
-		super().__init__(width,height,temp,weather)
-		self.hillsF,self.hillsB=[],[]
-		self.hillNumber = 3
-		self.BNumber = 2
-		self.smoothness=10
-		self.hillSpaceF = self.width//self.hillNumber
-		self.hillSpaceB = self.width//self.BNumber
-		self.hillTime = 300
-		self.hillsB=self.hillPts(self.hillsB,self.hillSpaceB,0,self.BNumber+2)
-		self.hillsF = self.hillPts(self.hillsF,self.hillSpaceF,0,self.hillNumber+2)
-		self.grass = super().atmosphericPersp(self.grass,1)
-		self.farColor = super().atmosphericPersp(self.grass,1)
-
-	def parabola(self,maxY,space, x):
-		y = (x-space/2)**2/(space)+maxY
-		if(y>self.height*3/4):
-			y = self.height*3/4
-		return y
-
-	def hillPts(self,ptsList,space,start,times):
-		base = self.height*3/4
-		xIncr = space/self.smoothness
-		for hill in range(times):
-			maxY= base - random.randint(base//20,base//10)
-			for pt in range(self.smoothness):
-				x = xIncr*pt+space*hill+start
-				y = self.parabola(maxY,space,xIncr*pt)
-				ptsList.append([x,y])
-		ptsList.append([self.width+2*space,self.height*3/4])
-		ptsList.append([0,self.height*3/4])
-		return ptsList
-
-	def draw(self,surf):
-		self.hillsB=super().animate(surf,self.hillsB,
-			self.farColor,self.hillSpaceB,self.hillTime*3)
-		self.timeDelay-=1
-		self.hillsF=super().animate(surf,self.hillsF,
-			self.grass,self.hillSpaceF,self.hillTime)
-		if(self.hillsF[0][0]<0-self.hillSpaceF):
-			del self.hillsF[-2:]
-			del self.hillsF[:self.smoothness]
-			self.hillPts(self.hillsF,
-						self.hillSpaceF,self.width+self.hillSpaceF,1)
-		if(self.hillsB[0][0]<0-self.hillSpaceB):
-			del self.hillsB[-2:]
-			del self.hillsB[:self.smoothness]
-			self.hillPts(self.hillsB,
-						self.hillSpaceB,self.width+self.hillSpaceB,1)
-
-class forest(land):
 	pass
 
-class lakes(land): 
+class forest(land):
 	pass
 
 if __name__ == '__main__':
@@ -246,20 +191,16 @@ if __name__ == '__main__':
 	pygame.display.set_caption("land")
 	base = land(width,height,0,"clear")
 	testPlain = plain(width,height,0,"clear")
-	testDesert = desert(width,height,0,"clear")
-	testRiver = river(width,height,0,"clear",3)
+	testRiver = river(width,height,0,"clear",2)
 	testmountains = mountains(width,height,0,"clear",1)
-	testHills = hills(width,height,0,"clear")
 	running = True
 	while running:
 		for event in pygame.event.get():
 			if(event.type == pygame.QUIT):
 				running = False
 		base.draw(screen)
-		testPlain.draw(screen)
-		# testDesert.draw(screen)
 		testmountains.draw(screen)
-		testHills.draw(screen)
+		testPlain.draw(screen)
 		testRiver.draw(screen)
 		pygame.display.flip()
 	pygame.quit()

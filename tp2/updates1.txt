@@ -1,0 +1,14 @@
+Changes since TP1:
+-drew the window of the train compartment
+-code can now continuously generate scenery for plains, mountains, and rivers
+	-wrote functions for changing color and size of features based on distance
+-code can now take user given inputs for commands and locations
+-train can be sped up or slowed using arrow keys
+-added 2 ways for webscraping
+	-using requests gets wikipedia page for a city to obtain summer and winter temps 
+	 and physical geography keywords
+	-using google maps API to obtain travel info between cities
+		-used to check if locations are valid or if travel is possible
+		-function to parse directions from google maps and remove unneeded info
+		-uses distance info from this to calculate location while train is traveling
+		-gets physical geography from API as train is traveling to change scenery displayed

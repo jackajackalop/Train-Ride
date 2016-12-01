@@ -12,12 +12,12 @@ def infoGrab(city):
 	if("search instead" in info or "the city" not in info):
 		return None
 	geoKW = geoSearch(info)
-	# tempKW = tempSearch(info)
-	# climKW = climateSearch(info)
-	return geoKW#,tempKW
+	tempKW = tempSearch(info)
+	climKW = climateSearch(info)
+	return geoKW,tempKW
 
 def geoSearch(info):
-	geoTerms = ["river","mountain","mountains","plains","hills","desert"]
+	geoTerms = ["river","mountain","mountains","plains","hills",]
 	found = []
 	words = info.split()
 	for term in geoTerms:
