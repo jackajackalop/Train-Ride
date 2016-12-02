@@ -6,7 +6,7 @@ import webscrape,webscrape2
 #framework referenced from blog.lukasperaza.com and hermit 
 #code for command console and taking commands based on hermit
 
-def trainStart(width=1600,height=1200):
+def trainStart(width=1200,height=900):
 	def draw():
 		screen.fill((255,255,255))
 		canvas.fill((255,255,255))

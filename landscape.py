@@ -36,7 +36,7 @@ class land(object):
 		pygame.draw.rect(surf,self.grass,(0,h*3/4,w,h/4))
 
 	def shift(self,pts,speed):
-		for index in range(0,len(pts)-1):
+		for index in range(0,len(pts)):
 			pts[index][0]-=speed
 		return pts
 
@@ -122,7 +122,7 @@ class mountains(land):
 		self.BNumber = self.mtNumber-2
 		self.mountainSpaceF = self.width//self.mtNumber
 		self.mountainSpaceB = self.width//self.BNumber
-		self.mountainTime = 800
+		self.mountainTime = 1500
 		self.BSplits = []
 		self.FSplits = []
 		self.mountainsB,self.BSplits=self.mountainPts(self.mountainsB,
@@ -132,6 +132,7 @@ class mountains(land):
 		self.color = (100,130,140)
 		self.farColor = super().atmosphericPersp(self.color,2)
 
+	#TODO fix ratchet mountains :'(		
 	def mountainPts(self,pts,splits,number,space,start,times):
 		widthMargin = self.width//(2*number)
 		y = (self.height*3/4)//(self.size+.5)
@@ -191,11 +192,14 @@ class hills(land):
 		self.smoothness=10
 		self.hillSpaceF = self.width//self.hillNumber
 		self.hillSpaceB = self.width//self.BNumber
-		self.hillTime = 300
+		self.hillTime = 200
 		self.hillsB=self.hillPts(self.hillsB,self.hillSpaceB,0,self.BNumber+2)
 		self.hillsF = self.hillPts(self.hillsF,self.hillSpaceF,0,self.hillNumber+2)
 		self.grass = super().atmosphericPersp(self.grass,1)
 		self.farColor = super().atmosphericPersp(self.grass,1)
+
+	def changeSpeed(self,x):
+		self.speed +=10*x
 
 	def parabola(self,maxY,space, x):
 		y = (x-space/2)**2/(space)+maxY
@@ -226,19 +230,70 @@ class hills(land):
 			del self.hillsF[-2:]
 			del self.hillsF[:self.smoothness]
 			self.hillPts(self.hillsF,
-						self.hillSpaceF,self.width+self.hillSpaceF,1)
+						self.hillSpaceF,self.width+2*self.hillSpaceF,1)
 		if(self.hillsB[0][0]<0-self.hillSpaceB):
 			del self.hillsB[-2:]
 			del self.hillsB[:self.smoothness]
 			self.hillPts(self.hillsB,
-						self.hillSpaceB,self.width+self.hillSpaceB,1)
+						self.hillSpaceB,self.width+2*self.hillSpaceB,1)
+
+class lake(land): 
+	def __init__(self,width,height,temp,weather):
+		super().__init__(width,height,temp,weather)
+		self.lake = []
+		self.lakeColor = (110,170,200)
+		self.lakeSpace = 2*width
+		self.lakePtsNumber=5
+		self.lakeTime = 30
+		self.lakePts()
+
+	def lakePts(self):
+		w,h = self.width,self.height
+		yIncr = h/4/self.lakePtsNumber
+		xMargin = w//2
+		for pt in range(self.lakePtsNumber+1):
+			x = random.randint(0,xMargin)
+			self.lake.append([x,h-yIncr*pt])
+		for pt in range(self.lakePtsNumber+1):
+			x = random.randint(0,xMargin)
+			self.lake.append([9*w+x,h*3/4+yIncr*pt])
+
+	def draw(self,surf):
+		speedIncr = (self.lakeSpace/self.lakeTime)/6
+		speed = self.lakeSpace/self.lakeTime/10+self.speed*speedIncr
+		pygame.draw.polygon(surf,self.lakeColor,self.lake)
+		self.lake=super().shift(self.lake,speed)
 
 class forest(land):
-	pass
+	def __init__(self,width,height,temp,weather):
+		super().__init__(width,height,temp,weather)
+		self.forest = []
+		self.color = self.atmosphericPersp(self.grass,-2)
+		self.trees = 6
+		self.treePts = 20
+		self.forestTime = 30
+		self.forestSpace = self.width//self.trees
+		self.forestPts()
 
-class lakes(land): 
-	pass
+	def forestPts(self,start,times):
+		w,h = self.width,self.height
+		yIncr = h/4/self.treePts
+		xIncr = w/self.trees/self.treePts
+		for tree in range(self.trees+1):
+			for pt in range(self.treePts+1):
 
+		for pt in range(self.lakePtsNumber+1):
+			x = random.randint(0,xMargin)
+			self.lake.append([x,h-yIncr*pt])
+		for pt in range(self.lakePtsNumber+1):
+			x = random.randint(0,xMargin)
+			self.lake.append([9*w+x,h*3/4+yIncr*pt])
+
+	def draw(self,surf):
+		speedIncr = (self.lakeSpace/self.lakeTime)/6
+		speed = self.lakeSpace/self.lakeTime/10+self.speed*speedIncr
+		pygame.draw.polygon(surf,self.lakeColor,self.lake)
+		self.lake=super().shift(self.lake,speed)
 if __name__ == '__main__':
 	width,height = 800,600
 	pygame.init()
@@ -250,6 +305,8 @@ if __name__ == '__main__':
 	testRiver = river(width,height,0,"clear",3)
 	testmountains = mountains(width,height,0,"clear",1)
 	testHills = hills(width,height,0,"clear")
+	testLakes = lake(width,height,0,"clear")
+	testForest = forest(width,height,0,"clear")
 	running = True
 	while running:
 		for event in pygame.event.get():
@@ -258,8 +315,10 @@ if __name__ == '__main__':
 		base.draw(screen)
 		testPlain.draw(screen)
 		# testDesert.draw(screen)
-		testmountains.draw(screen)
-		testHills.draw(screen)
-		testRiver.draw(screen)
+		# testmountains.draw(screen)
+		# testHills.draw(screen)
+		# testRiver.draw(screen)
+		testLakes.draw(screen)
+		testForest.draw(screen)
 		pygame.display.flip()
 	pygame.quit()
