@@ -24,6 +24,9 @@ def trainStart(width=1200,height=900):
 				hills.draw(window)
 			if("river" in currentInfo):
 				river.draw(window)
+			if("forest" in currentInfo or "wood" in currentInfo 
+				or "woods" in currentInfo):
+				forest.draw(window)
 		else:
 			sceneryBase.draw(window)
 			plains.draw(window)
@@ -31,6 +34,15 @@ def trainStart(width=1200,height=900):
 		windowFrame.draw(window)
 		screen.blit(canvas,(0,0))
 		screen.blit(window,(0,0))
+
+	def daylightChange():
+		sceneryBase.daylight(hour)
+		plains.daylight(hour)
+		river.daylight(hour)
+		mountains.daylight(hour)
+		desert.daylight(hour)
+		hills.daylight(hour)
+		forest.daylight(hour)
 
 	def drawConsole():
 		font =pygame.font.SysFont(pygame.font.get_default_font(),width//35)
@@ -77,6 +89,7 @@ def trainStart(width=1200,height=900):
 	executed = False
 	step = 0
 	speed = 0
+	hour = 1
 	mph = 500
 	start,end=False,False
 	startLoc,endLoc = "",""
@@ -97,6 +110,7 @@ def trainStart(width=1200,height=900):
 	mountains = landscape.mountains(width*2/3,height*2/3,0,"clear",1)
 	desert = landscape.desert(width*2/3,height*2/3,0,'clear')
 	hills = landscape.hills(width*2/3,height*2/3,0,'clear')
+	forest = landscape.forest(width*2/3,height*2/3,0,'clear')
 
 	while(running):
 		if(not start or not end): showConsole=True
@@ -124,12 +138,14 @@ def trainStart(width=1200,height=900):
 					plains.changeSpeed(10)
 					river.changeSpeed(10)
 					mountains.changeSpeed(10)
+					forest.changeSpeed(10)
 				elif((key == "left" or key == "down")and (speed-10)>=0):
 					speed-=10
 					mph-=1000
 					plains.changeSpeed(-10)
 					river.changeSpeed(-10)
 					mountains.changeSpeed(-10)
+					forest.changeSpeed(-10)
 				elif(key == "/"):
 					showConsole = not showConsole
 					inputs = ""
@@ -172,7 +188,8 @@ def trainStart(width=1200,height=900):
 						else:
 							inputs = str(exeCommand(str(inputs)))
 						executed = True
-						
+		hour = (pygame.time.get_ticks()/(2000-speed*10))%24
+		daylightChange()
 		draw()
 		drawConsole()
 		pygame.display.flip()

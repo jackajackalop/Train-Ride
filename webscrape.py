@@ -17,7 +17,8 @@ def infoGrab(city):
 	return geoKW#,tempKW
 
 def geoSearch(info):
-	geoTerms = ["river","mountain","mountains","plains","hills","desert"]
+	geoTerms = ["river","mountain","mountains","plains",
+	"hills","desert","wood","woods","forest"]
 	found = []
 	words = info.split()
 	for term in geoTerms:
