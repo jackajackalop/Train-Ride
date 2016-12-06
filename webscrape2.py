@@ -1,17 +1,20 @@
 import json
 import googlemaps
-# from googleplaces import GooglePlaces, types, lang
 import googleplaces
+from geolocation.main import GoogleMaps
+import requests
+
+key ='AIzaSyDVfV_V7nCQ9Dt4BHdcQTmBDbjdODEUuCo'
 
 def checkLocation(loc):
-	gmaps = googleplaces.GooglePlaces('AIzaSyDVfV_V7nCQ9Dt4BHdcQTmBDbjdODEUuCo')
+	gmaps = googleplaces.GooglePlaces(key)
 	try:
 		info = gmaps.nearby_search(location=loc)
 		return True
 	except:
 		return None
 
-def steps(info):
+def steps(info): #helps infoParse()
 	sectionInfo = []
 	for step in info:
 		sectionInfo.append(infoParse(step))
@@ -35,11 +38,10 @@ def infoParse(info): #turns json list into dictionary
 	return parsed
 
 def infoGet(start,end): #used https://github.com/googlemaps/google-maps-services-python/blob/master/README.md
-	gmaps = googlemaps.Client(key ='AIzaSyDVfV_V7nCQ9Dt4BHdcQTmBDbjdODEUuCo')
+	gmaps = googlemaps.Client(key =key)
 	try:
 		response = gmaps.directions(start,end)[0]
 		infoDict = infoParse(response)
-		# print(infoDict['legs']['steps'][0])
 		return infoDict,surroundings(infoDict["legs"]["start_location"])
 	except: return None,None
 
@@ -47,7 +49,7 @@ def surroundings(loc):
 	#referenced https://github.com/slimkrazy/python-google-places
 	geoTerms = ["river","mountain","mountains","plains","hills","lake","woods","forest"]
 	found = []
-	gmaps = googleplaces.GooglePlaces('AIzaSyDVfV_V7nCQ9Dt4BHdcQTmBDbjdODEUuCo')
+	gmaps = googleplaces.GooglePlaces(key)
 	info = gmaps.nearby_search(lat_lng=loc,radius=5000,types=["natural_feature"])
 	for place in info.places:
 		place.get_details()
@@ -56,8 +58,22 @@ def surroundings(loc):
 				found.append(term)
 	return set(found)
 
- 
+def city(latitude,longitude):
+	gmaps = GoogleMaps(key)
+	info = gmaps.search(lat=latitude, lng = longitude).first()
+	city ="%s"%info.city
+	return city.split('\'')[1]
+
+def climateInfo(loc):
+	APIURL="http://www.ncdc.noaa.gov/cdo-web/api/v2/data"
+	response = requests.post(APIURL,params=loc,
+							 headers={'token': 'pqVesrVGzgJUYuNuyMRuMffMACVuKZZp'},
+							 )
+	return response.text
+
 if __name__ == '__main__':
-	print(infoGet("duquesne","houston"))
+	print(climateInfo({"datasetid":"EVAPo","station":"GHCND:AEM00041217","startdate":"2010-05-01","enddate":"2010-05-01"}))
+	# print(climateInfo({'lng': -104.9902503, 'lat': 39.7392353}))
+	# print(infoGet("duquesne","houston"))
 	# print(surroundings({'lng': -104.9902503, 'lat': 39.7392353}))
 

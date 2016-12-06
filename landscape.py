@@ -1,5 +1,6 @@
 import pygame
 import random, math
+import foliage
 
 class land(object):
 	def __init__(self,width,height,temp,weather):
@@ -39,7 +40,7 @@ class land(object):
 		averageColor = sum(newColor)//3
 		for color in range(3):
 			difference = averageColor-newColor[color]
-			newColor[color]+=difference*(distance-1)/3
+			newColor[color]+=difference*(distance-1)/4
 		return (newColor)
 
 	def draw(self,surf):

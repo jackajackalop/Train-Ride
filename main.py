@@ -1,6 +1,6 @@
 import pygame
 import scene, landscape
-import webscrape,webscrape2
+import webscrape2, webscrape
 
 
 #framework referenced from blog.lukasperaza.com and hermit 
@@ -65,12 +65,24 @@ def trainStart(width=1200,height=900):
 			# print(distance)
 
 	def exeCommand(command):
+		nonlocal speed, month
 		failed = "Not Executed! :("
-		noSpace = command.split()
+		noSpace = command.lower().split()
+		months =["january","february","march","april","may","june",
+		"july","august","september","october","november","december"]
 		try:
 			commandType = noSpace[0]+" "+noSpace[1]
+			amount = noSpace[2]
 			if(commandType not in commandlist):
 				return failed
+			else:
+				if(commandType == "set speed"):
+					speed = int(noSpace[2])
+				elif(commandType == "set month"):
+					if(not amount.isdigit()):
+						amount = months.index(amount)+1
+					month = amount
+
 			return "hahahahaaaaa :'D"
 		except:
 			return failed
@@ -89,7 +101,8 @@ def trainStart(width=1200,height=900):
 	executed = False
 	step = 0
 	speed = 0
-	hour = 1
+	hour = 0
+	month = 6
 	mph = 500
 	start,end=False,False
 	startLoc,endLoc = "",""
@@ -162,7 +175,7 @@ def trainStart(width=1200,height=900):
 					if(key == "return" and len(inputs)>0):
 						if(not start):
 							startLoc = inputs
-							# check = webscrape2.checkLocation(startLoc)
+							check = webscrape2.checkLocation(startLoc)
 							# if(check==None):
 							# 	inputs = "Not available location :("
 							# 	startLoc=""
