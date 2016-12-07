@@ -1,0 +1,12 @@
+Mecca Parker - mjparker
+home screen where you can enter destinations
+cityscapes
+
+John Paul-jharrima
+Tree color
+
+Ryan Eckert-reckert
+prevent bad input 
+
+Peter 
+prevent too much input

@@ -3,6 +3,7 @@ import googlemaps
 import googleplaces
 from geolocation.main import GoogleMaps
 import requests
+import webscrape
 
 key ='AIzaSyDVfV_V7nCQ9Dt4BHdcQTmBDbjdODEUuCo'
 
@@ -56,13 +57,19 @@ def surroundings(loc):
 		for term in geoTerms:
 			if(term in place.name.lower()):
 				found.append(term)
+	locCity = city(loc['lat'],loc['lng'])
+	if(locCity!=None):
+		found+=webscrape.infoGrab(locCity)
 	return set(found)
 
 def city(latitude,longitude):
-	gmaps = GoogleMaps(key)
-	info = gmaps.search(lat=latitude, lng = longitude).first()
-	city ="%s"%info.city
-	return city.split('\'')[1]
+	try:
+		gmaps = GoogleMaps(key)
+		info = gmaps.search(lat=latitude, lng = longitude).first()
+		city ="%s"%info.city
+		return city.split('\'')[1]
+	except:
+		return None
 
 def climateInfo(loc):
 	APIURL="http://www.ncdc.noaa.gov/cdo-web/api/v2/data"
@@ -72,8 +79,9 @@ def climateInfo(loc):
 	return response.text
 
 if __name__ == '__main__':
-	print(climateInfo({"datasetid":"EVAPo","station":"GHCND:AEM00041217","startdate":"2010-05-01","enddate":"2010-05-01"}))
+	# print(climateInfo({"datasetid":"EVAPo","station":"GHCND:AEM00041217","startdate":"2010-05-01","enddate":"2010-05-01"}))
 	# print(climateInfo({'lng': -104.9902503, 'lat': 39.7392353}))
-	# print(infoGet("duquesne","houston"))
+	print(infoGet("pittsburgh","houston"))
 	# print(surroundings({'lng': -104.9902503, 'lat': 39.7392353}))
+	# print(city(39.7392353,-104.9902503))
 

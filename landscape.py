@@ -317,7 +317,8 @@ class forest(land):
 	def __init__(self,width,height,temp,weather):
 		super().__init__(width,height,temp,weather)
 		self.forest = []
-		self.color0 = (50,80,60)
+		self.trunk0 = (70,50,30)
+		self.leaves0 = (50,70,40)
 		self.trees = 2
 		self.treePts = 20
 		self.forestTime = 30
@@ -326,7 +327,8 @@ class forest(land):
 
 	def daylight(self,hour):
 		r,g,b = self.daylightEq(hour)
-		self.color = (self.color0[0]+r//3,self.color0[1]+g//3,self.color0[2]+b//3)
+		self.trunk = (self.trunk0[0]+r//3,self.trunk0[1]+g//3,self.trunk0[2]+b//3)
+		self.leaves = (self.leaves0[0]+r//3,self.leaves0[1]+g//3,self.leaves0[2]+b//3)
 
 	def forestPts(self,start,times):
 		start+=self.forestSpace//2
@@ -336,24 +338,42 @@ class forest(land):
 		treeLeft,treeRight =[],[]
 		for tree in range(times):
 			x = start+self.forestSpace*tree
-			for pt in range(0,self.treePts):
-				maxDX = xIncr//2+xIncr//2*pt
-				dx=random.randint(maxDX//2,maxDX)
-				if(pt%2==0):dx = maxDX//4
-				treeLeft.append([x-dx,0+yIncr*pt])
-				treeRight.append([x+dx,0+yIncr*pt])
-			treeLeft.reverse()
-			self.forest+=treeLeft+treeRight
-			treeLeft,treeRight =[],[]
-		self.forest.append([0,h])
+			self.forest += foliage.tree4(x,h,self.trunk0,self.leaves0,1)
+
+
+	# def forestPts(self,start,times):
+	# 	start+=self.forestSpace//2
+	# 	w,h = self.width,self.height
+	# 	yIncr = (h)/(self.treePts-1)
+	# 	xIncr = (w/self.trees)//(self.treePts+1)//2
+	# 	treeLeft,treeRight =[],[]
+	# 	for tree in range(times):
+	# 		x = start+self.forestSpace*tree
+	# 		for pt in range(0,self.treePts):
+	# 			maxDX = xIncr//2+xIncr//2*pt
+	# 			dx=random.randint(maxDX//2,maxDX)
+	# 			if(pt%2==0):dx = maxDX//4
+	# 			treeLeft.append([x-dx,0+yIncr*pt])
+	# 			treeRight.append([x+dx,0+yIncr*pt])
+	# 		treeLeft.reverse()
+	# 		self.forest+=treeLeft+treeRight
+	# 		treeLeft,treeRight =[],[]
+	# 	self.forest.append([0,h])
+	def animate(self,surf,pts,trunk,leaves,space,time):
+		self.timeDelay+=1
+		w,h = self.width,self.height
+		speedIncr = (space/time)/6
+		speed = space/time+self.speed*speedIncr
+		pts = self.shift(pts,speed)
+		for tree in self.forest:
+			pygame.draw.line(surf,tree[5],(tree[0],tree[1]),(tree[2],tree[3]),tree[4])
+		return pts
 
 	def draw(self,surf):
-		# pygame.draw.polygon(surf,self.color,self.forest) #testing
-		self.forest=super().animate(surf,
-						self.forest,self.color,self.forestSpace,self.forestTime)
-		if(self.forest[self.treePts*2][0]<0):
+		self.forest= self.animate(surf,
+						self.forest,self.trunk0,self.leaves0,self.forestSpace,self.forestTime)
+		if(self.forest[0][0]<0):
 			self.forest.pop()
-			del self.forest[:self.treePts*2]
 			self.forestPts(self.width,1)
 
 if __name__ == '__main__':
@@ -363,11 +383,11 @@ if __name__ == '__main__':
 	pygame.display.set_caption("land")
 	base = land(width,height,0,"clear")
 	testPlain = plain(width,height,0,"clear")
-	testDesert = desert(width,height,0,"clear")
-	testRiver = river(width,height,0,"clear",3)
-	testmountains = mountains(width,height,0,"clear",1)
-	testHills = hills(width,height,0,"clear")
-	testLakes = lake(width,height,0,"clear")
+	# testDesert = desert(width,height,0,"clear")
+	# testRiver = river(width,height,0,"clear",3)
+	# testmountains = mountains(width,height,0,"clear",1)
+	# testHills = hills(width,height,0,"clear")
+	# testLakes = lake(width,height,0,"clear")
 	testForest = forest(width,height,0,"clear")
 	running = True
 	while running:
@@ -381,19 +401,19 @@ if __name__ == '__main__':
 		hour = (pygame.time.get_ticks()/(2000))%24
 		base.daylight(hour)
 		testPlain.daylight(hour)
-		testmountains.daylight(hour)
-		testHills.daylight(hour)
-		testRiver.daylight(hour)
-		testDesert.daylight(hour)
-		testLakes.daylight(hour)
-		testForest.daylight(hour)
+		# testmountains.daylight(hour)
+		# testHills.daylight(hour)
+		# testRiver.daylight(hour)
+		# testDesert.daylight(hour)
+		# testLakes.daylight(hour)
+		# testForest.daylight(hour)
 		base.draw(screen)
 		testPlain.draw(screen)
 		# testDesert.draw(screen)
-		testmountains.draw(screen)
-		testHills.draw(screen)
-		testRiver.draw(screen)
-		testLakes.draw(screen)
+		# testmountains.draw(screen)
+		# testHills.draw(screen)
+		# testRiver.draw(screen)
+		# testLakes.draw(screen)
 		testForest.draw(screen)
 		pygame.display.flip()
 	pygame.quit()

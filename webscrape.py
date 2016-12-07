@@ -23,7 +23,7 @@ def geoSearch(info):
 	words = info.split()
 	for term in geoTerms:
 		if(term in info): found.append(term)
-	return set(found)
+	return found
 
 def tempSearch(info):
 	info = info.replace("<"," ")
