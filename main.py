@@ -30,7 +30,6 @@ def trainStart(width=1200,height=900):
 		else:
 			sceneryBase.draw(window)
 			plains.draw(window)
-		print(currentInfo)
 		windowFrame.draw(window)
 		screen.blit(canvas,(0,0))
 		screen.blit(window,(0,0))
@@ -53,6 +52,42 @@ def trainStart(width=1200,height=900):
 			text = font.render(":"+input,False,(150,150,150))
 			screen.blit(text,[width*.02,height*.91])
 
+	def drawSplash():
+		def multiline(instructions):
+			lines = len(instructions)//40
+			lineNumber =0
+			for line in instructions.splitlines():
+				textLine = line.strip()
+				# textLine.strip()
+				text=font.render(textLine,False,(180,180,180))
+				screen.blit(text,[margin,margin+height//20*lineNumber])
+				lineNumber+=1
+
+		font =pygame.font.SysFont('lettergothicstdopentype',width//30,bold=True)
+		margin = splashMargins+20
+		if(showSplash):
+			splash.fill((0,0,0))
+			screen.blit(splash,[splashMargins,splashMargins])
+			instructions ="".join(
+"""Hello! Welcome to Train Ride Simulator!
+Enter two destinations that can be 
+traveled between by train (not through
+oceans or to fictional places) and 
+watch as beautiful computer-generated 
+approximations of the actual scenery 
+along the route pass you by!
+
+Commands you can use:
+set time x (x is an hour of the day 
+			in 24 hour form)
+set month x
+set speed x (x is betweed -5 and 5)
+help 
+
+Press q to quit this instructions screen
+""")
+			multiline(instructions)
+
 	def statusUpdate():
 		nonlocal step,currentInfo,times
 		if(start and end):
@@ -61,40 +96,44 @@ def trainStart(width=1200,height=900):
 				currentInfo = webscrape2.surroundings(travelInfo['legs']['steps'][step]['end_location'])
 				times.append(pygame.time.get_ticks())
 				step+=1
-				print(step,currentInfo,travelInfo['legs']['steps'][step]['end_location'])
-			print(distance)
+				# print(step,currentInfo,travelInfo['legs']['steps'][step]['end_location'])
+			# print(distance)
 
 	def exeCommand(command):
-		nonlocal speed, month
+		nonlocal speed, month,showSplash,showConsole
 		failed = "Not Executed! :("
 		noSpace = command.lower().split()
 		months =["january","february","march","april","may","june",
 		"july","august","september","october","november","december"]
 		try:
-			commandType = noSpace[0]+" "+noSpace[1]
-			amount = noSpace[2]
-			if(commandType not in commandlist):
-				return failed
+			if(command=="help"):
+				showConsole=False
+				showSplash=True
 			else:
-				if(commandType == "set speed"):
-					speed = int(noSpace[2])
-				elif(commandType == "set month"):
-					if(not amount.isdigit()):
-						amount = months.index(amount)+1
-					month = amount
-
-			return "hahahahaaaaa :'D"
+				commandType = noSpace[0]+" "+noSpace[1]
+				amount = noSpace[2]
+				if(commandType not in commandlist):
+					return failed
+				else:
+					if(commandType == "set speed"):
+						speed = int(noSpace[2])
+					elif(commandType == "set month"):
+						if(not amount.isdigit()):
+							amount = months.index(amount)+1
+						month = amount
+			return "Executed :D"
 		except:
 			return failed
 
 	pygame.init()
 	screen = pygame.display.set_mode((width,height))
-	pygame.display.set_caption("choo-choo")
+	pygame.display.set_caption("Train Ride Simulator")
 
 	clock = pygame.time.Clock()
 	running = True
 	showConsole = False
-	commandlist = {"set time","set month","set speed"}
+	showSplash = True
+	commandlist = {"set time","set month","set speed","help"}
 
 	color = (120,130,130)
 	inputs = ""
@@ -111,6 +150,10 @@ def trainStart(width=1200,height=900):
 	
 	canvas= pygame.Surface((width,height))
 	window = pygame.Surface((width*2/3,height*2/3))
+	splashMargins = 20
+	splash = pygame.Surface((width-2*splashMargins,height-2*splashMargins))
+	splash.set_alpha(120,pygame.RLEACCEL)
+
 	console = pygame.Surface((width/3,height/20))
 	console.fill([0,0,0])
 	console.set_alpha(50,pygame.RLEACCEL)
@@ -126,42 +169,22 @@ def trainStart(width=1200,height=900):
 	forest = landscape.forest(width*2/3,height*2/3,0,'clear')
 
 	while(running):
-		if(not start or not end): showConsole=True
+		if(not start or not end):
+			if(not showSplash): showConsole=True
 		for event in pygame.event.get():
 			if(event.type == pygame.QUIT):
 				running = False
 			elif(event.type == pygame.KEYDOWN):
 				key = pygame.key.name(event.key)
+				if(key == "/"):
+					showConsole = not showConsole
+					inputs = ""
 				if(executed):
 					executed=False
 					inputs = ""
-				elif(not showConsole and key == "r"):
-					inputs = ""
-					executed = False
-					speed = 0
-					start,end=False,False
-					startLoc,endLoc = "",""
-					currentInfo = {}
-					geoKW =[]
-					tempKW = []
-					climateKW=[]
-				elif((key == "right" or key== "up") and abs(speed+10)<=50):
-					speed+=10
-					mph+=1000
-					plains.changeSpeed(10)
-					river.changeSpeed(10)
-					mountains.changeSpeed(10)
-					forest.changeSpeed(10)
-				elif((key == "left" or key == "down")and (speed-10)>=0):
-					speed-=10
-					mph-=1000
-					plains.changeSpeed(-10)
-					river.changeSpeed(-10)
-					mountains.changeSpeed(-10)
-					forest.changeSpeed(-10)
-				elif(key == "/"):
-					showConsole = not showConsole
-					inputs = ""
+				elif(showSplash):
+					if(key=='q'):
+						showSplash=False
 				elif(showConsole):
 					if(len(inputs)<=30):
 						if(key == "space"):
@@ -173,7 +196,10 @@ def trainStart(width=1200,height=900):
 						elif(key == "backspace" and len(inputs)>0):
 							inputs=inputs[:-1]
 					if(key == "return" and len(inputs)>0):
-						if(not start):
+						if(inputs=="help"):
+							print(inputs)
+							inputs =str(exeCommand(str(inputs)))
+						elif(not start):
 							startLoc = inputs
 							check = webscrape2.checkLocation(startLoc)
 							if(check==None):
@@ -187,7 +213,6 @@ def trainStart(width=1200,height=900):
 							check = webscrape2.checkLocation(endLoc)
 							travelInfo,currentInfo=webscrape2.infoGet(startLoc,
 																		endLoc)
-							print(currentInfo)
 							if(check==None or travelInfo==None):
 								inputs = "Not available location :("
 								start=False
@@ -199,9 +224,35 @@ def trainStart(width=1200,height=900):
 						else:
 							inputs = str(exeCommand(str(inputs)))
 						executed = True
+				elif(not showConsole and key == "r"):
+					inputs = ""
+					executed = False
+					speed = 0
+					start,end=False,False
+					startLoc,endLoc = "",""
+					currentInfo = {}
+					geoKW =[]
+					tempKW = []
+					climateKW=[]
+					#for incrementing speed of the train
+				if((key == "right" or key== "up") and abs(speed+10)<=50):
+					speed+=10
+					mph+=1000
+					plains.changeSpeed(10)
+					river.changeSpeed(10)
+					mountains.changeSpeed(10)
+					forest.changeSpeed(10)
+				elif((key == "left" or key == "down")and (speed-10)>=0):
+					speed-=10
+					mph-=1000
+					plains.changeSpeed(-10)
+					river.changeSpeed(-10)
+					mountains.changeSpeed(-10)
+					forest.changeSpeed(-10)
 		hour = (pygame.time.get_ticks()/(2000-speed*10))%24
 		daylightChange()
 		draw()
+		drawSplash()
 		drawConsole()
 		pygame.display.flip()
 		clock.tick()

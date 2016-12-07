@@ -7,11 +7,12 @@ import math,random
 
 
 
-def tree4(x,y,trunk,leaves,distance):
+def tree4(w,h,x,y,trunk,leaves,distance):
+
 	treePts = []
 	def drawTree(**p):
 		if p['depth'] < p['maxdepth']:
-			if(p['height']<9): p['color']=p['leaves']
+			if(p['height']<h//13): p['color']=p['leaves']
 			if p['height'] <1:return
 
 			dep = p['depth']
@@ -62,13 +63,13 @@ def tree4(x,y,trunk,leaves,distance):
 			 angle = math.pi/2,
 			 dangle = lambda dep: (-math.pi/6)+((random.random()-0.5)*(dep))*2,
 
-			 trunk = 50//distance,
+			 trunk = h*.2//distance,
 			 dtrunk = lambda dep: 0.8*random.random(),
 
-			 width = 8//distance,
+			 width = w*.02//distance,
 			 dwidth = lambda dep: random.random()*0.2+0.8,
 
-			 height = 50//distance,
+			 height = h*.2//distance,
 			 dheight = lambda dep: random.random()*0.5+0.5,
 
 			 opening = math.pi/5,
@@ -77,7 +78,7 @@ def tree4(x,y,trunk,leaves,distance):
 			 color = trunk,
 			 leaves = leaves,
 			 depth = 0,
-			 maxdepth = 8
+			 maxdepth = 7
 			)
 	return treePts
 
@@ -102,18 +103,18 @@ if __name__ == '__main__':
 	screen = pygame.display.set_mode((width,height))
 	pygame.display.set_caption("happy little trees :DDDD")
 	running = True
-	tree4(screen,width//4,height*3//4,(70,50,30),(50,70,40),1)
-	tree4(screen,width//2,height*3//4,(70,50,30),(50,70,40),2)
-	tree4(screen,width*3//4,height*3//4,(70,50,30),(50,70,40),3)
+	tree4(width,height,width//4,height*3//4,(70,50,30),(50,70,40),1)
+	tree4(width,height,width//2,height*3//4,(70,50,30),(50,70,40),2)
+	tree4(width,height,width*3//4,height*3//4,(70,50,30),(50,70,40),3)
 	while running:
 		for event in pygame.event.get():
 			if(event.type == pygame.QUIT):
 				running = False
 			if(event.type==pygame.KEYDOWN):
 				screen.fill((0,0,0))
-				tree4(screen,width//4,height*3//4,(70,50,30),(50,70,40),1)
-				tree4(screen,width//2,height*3//4,(70,50,30),(50,70,40),2)
-				tree4(screen,width*3//4,height*3//4,(70,50,30),(50,70,40),3)
+				tree4(width,height,width//4,height*3//4,(70,50,30),(50,70,40),1)
+				tree4(width,height,width//2,height*3//4,(70,50,30),(50,70,40),2)
+				tree4(width,height,width*3//4,height*3//4,(70,50,30),(50,70,40),3)
 		pygame.display.flip()
 		# screen.blit(canvas,(0,0))
 	pygame.quit()

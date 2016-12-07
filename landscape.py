@@ -333,13 +333,9 @@ class forest(land):
 	def forestPts(self,start,times):
 		start+=self.forestSpace//2
 		w,h = self.width,self.height
-		yIncr = (h)/(self.treePts-1)
-		xIncr = (w/self.trees)//(self.treePts+1)//2
-		treeLeft,treeRight =[],[]
 		for tree in range(times):
 			x = start+self.forestSpace*tree
-			self.forest += foliage.tree4(x,h,self.trunk0,self.leaves0,1)
-
+			self.forest.append(foliage.tree4(w,h,x,h,self.trunk0,self.leaves0,1))
 
 	# def forestPts(self,start,times):
 	# 	start+=self.forestSpace//2
@@ -359,21 +355,29 @@ class forest(land):
 	# 		self.forest+=treeLeft+treeRight
 	# 		treeLeft,treeRight =[],[]
 	# 	self.forest.append([0,h])
+
+	def shift(self,speed):
+		for tree in self.forest:
+			for line in tree:
+				line[0]-=speed
+				line[2]-=speed
+	
 	def animate(self,surf,pts,trunk,leaves,space,time):
 		self.timeDelay+=1
 		w,h = self.width,self.height
 		speedIncr = (space/time)/6
 		speed = space/time+self.speed*speedIncr
-		pts = self.shift(pts,speed)
+		# print(len(self.forest),self.forest)
+		self.shift(speed)
 		for tree in self.forest:
-			pygame.draw.line(surf,tree[5],(tree[0],tree[1]),(tree[2],tree[3]),tree[4])
-		return pts
+			for line in tree:
+				pygame.draw.line(surf,line[5],(line[0],line[1]),(line[2],line[3]),line[4])
 
 	def draw(self,surf):
-		self.forest= self.animate(surf,
+		self.animate(surf,
 						self.forest,self.trunk0,self.leaves0,self.forestSpace,self.forestTime)
-		if(self.forest[0][0]<0):
-			self.forest.pop()
+		if(self.forest[1][0][2]<0):
+			self.forest.pop(0)
 			self.forestPts(self.width,1)
 
 if __name__ == '__main__':
@@ -384,10 +388,10 @@ if __name__ == '__main__':
 	base = land(width,height,0,"clear")
 	testPlain = plain(width,height,0,"clear")
 	# testDesert = desert(width,height,0,"clear")
-	# testRiver = river(width,height,0,"clear",3)
-	# testmountains = mountains(width,height,0,"clear",1)
-	# testHills = hills(width,height,0,"clear")
-	# testLakes = lake(width,height,0,"clear")
+	testRiver = river(width,height,0,"clear",3)
+	testmountains = mountains(width,height,0,"clear",1)
+	testHills = hills(width,height,0,"clear")
+	testLakes = lake(width,height,0,"clear")
 	testForest = forest(width,height,0,"clear")
 	running = True
 	while running:
@@ -401,19 +405,19 @@ if __name__ == '__main__':
 		hour = (pygame.time.get_ticks()/(2000))%24
 		base.daylight(hour)
 		testPlain.daylight(hour)
-		# testmountains.daylight(hour)
-		# testHills.daylight(hour)
-		# testRiver.daylight(hour)
+		testmountains.daylight(hour)
+		testHills.daylight(hour)
+		testRiver.daylight(hour)
 		# testDesert.daylight(hour)
-		# testLakes.daylight(hour)
-		# testForest.daylight(hour)
+		testLakes.daylight(hour)
+		testForest.daylight(hour)
 		base.draw(screen)
 		testPlain.draw(screen)
 		# testDesert.draw(screen)
-		# testmountains.draw(screen)
-		# testHills.draw(screen)
-		# testRiver.draw(screen)
-		# testLakes.draw(screen)
+		testmountains.draw(screen)
+		testHills.draw(screen)
+		testRiver.draw(screen)
+		testLakes.draw(screen)
 		testForest.draw(screen)
 		pygame.display.flip()
 	pygame.quit()
