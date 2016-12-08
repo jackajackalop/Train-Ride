@@ -1,6 +1,8 @@
 import pygame
 import scene, landscape
 import webscrape2, webscrape
+import os
+import random
 
 
 #framework referenced from blog.lukasperaza.com and hermit 
@@ -43,6 +45,15 @@ def trainStart(width=1200,height=900):
 		hills.daylight(hour)
 		forest.daylight(hour)
 
+	def monthChange():
+		sceneryBase.changeMonth(month)
+		plains.changeMonth(month)
+		river.changeMonth(month)
+		mountains.changeMonth(month)
+		desert.changeMonth(month)
+		hills.changeMonth(month)
+		forest.changeMonth(month)
+
 	def drawConsole():
 		font =pygame.font.SysFont(pygame.font.get_default_font(),width//35)
 		if(showConsole):
@@ -68,7 +79,8 @@ def trainStart(width=1200,height=900):
 		if(showSplash):
 			splash.fill((0,0,0))
 			screen.blit(splash,[splashMargins,splashMargins])
-			instructions ="".join(
+			if(not showHome):
+				instructions ="".join(
 """Hello! Welcome to Train Ride Simulator!
 Enter two destinations that can be 
 traveled between by train (not through
@@ -78,26 +90,49 @@ approximations of the actual scenery
 along the route pass you by!
 
 Commands you can use:
-set time x (x is an hour of the day 
+-set time x (x is an hour of the day 
 			in 24 hour form)
-set month x
-set speed x (x is betweed -5 and 5)
-help 
+-set month x
+-set speed x (x is betweed -5 and 5)
+-help 
 
 Press q to quit this instructions screen
 """)
-			multiline(instructions)
+				multiline(instructions)
+			elif(showHome): 
+				font =pygame.font.SysFont('lettergothicstdopentype',width//15,bold=True)
+				instructions ="Train Ride Simulator!"
+				text=font.render(instructions,False,(180,180,180))
+				screen.blit(text,[margin,height//2])
+				font =pygame.font.SysFont('lettergothicstdopentype',width//25,bold=True)
+				instructions ="Press 'h' for help or 'q' to start"
+				text=font.render(instructions,False,(180,180,180))
+				screen.blit(text,[margin,height//2+height//10])
+			elif(arrived):
+				font =pygame.font.SysFont('lettergothicstdopentype',width//15,bold=True)
+				instructions ="You have arrived!"
+				text=font.render(instructions,False,(180,180,180))
+				screen.blit(text,[margin,height//2])
+				font =pygame.font.SysFont('lettergothicstdopentype',width//25,bold=True)
+				instructions ="Press 'r' to restart!"
+				text=font.render(instructions,False,(180,180,180))
+				screen.blit(text,[margin,height//2+height//10])
 
 	def statusUpdate():
-		nonlocal step,currentInfo,times
+		nonlocal step,currentInfo,times,skip
 		if(start and end):
-			distance = mph*(pygame.time.get_ticks()-times[-1])/1000/60
-			if(distance>=travelInfo['legs']['steps'][step]['distance']['value']):
-				currentInfo = webscrape2.surroundings(travelInfo['legs']['steps'][step]['end_location'])
-				times.append(pygame.time.get_ticks())
-				step+=1
-				# print(step,currentInfo,travelInfo['legs']['steps'][step]['end_location'])
-			# print(distance)
+			try:
+				# print(skip)
+				distance = mph*(pygame.time.get_ticks()-times[-1])/1000/60
+				if(distance>=travelInfo['legs']['steps'][step]['distance']['value'] or skip):
+					currentInfo = webscrape2.surroundings(travelInfo['legs']['steps'][step]['end_location'])
+					times.append(pygame.time.get_ticks())
+					step+=1
+					# print(step,currentInfo,travelInfo['legs']['steps'][step]['end_location'])
+					skip=False
+			except: 
+				skip = False
+				arrived=True
 
 	def exeCommand(command):
 		nonlocal speed, month,showSplash,showConsole
@@ -109,6 +144,7 @@ Press q to quit this instructions screen
 			if(command=="help"):
 				showConsole=False
 				showSplash=True
+				showHome=False
 			else:
 				commandType = noSpace[0]+" "+noSpace[1]
 				amount = noSpace[2]
@@ -120,24 +156,47 @@ Press q to quit this instructions screen
 					elif(commandType == "set month"):
 						if(not amount.isdigit()):
 							amount = months.index(amount)+1
-						month = amount
+						month = int(amount)
+						monthChange()
+
 			return "Executed :D"
 		except:
 			return failed
 
+	def queueMusic(path):
+		music = []
+		for file in os.listdir(path):
+			if(".mp3" in file):
+				music.append(path+"/"+file)
+		return shuffle(music)
+
+	def shuffle(songlist):
+		playlist=[]
+		for songs in range(len(songlist)):
+			index = random.randint(0,len(songlist)-1)
+			playlist.append(songlist.pop(index))
+		return playlist
+
 	pygame.init()
 	screen = pygame.display.set_mode((width,height))
 	pygame.display.set_caption("Train Ride Simulator")
+	playlist = queueMusic("music")
+	played = []
+	SONGOVER= pygame.USEREVENT
+	pygame.mixer.music.set_endevent(SONGOVER)
 
 	clock = pygame.time.Clock()
 	running = True
 	showConsole = False
 	showSplash = True
-	commandlist = {"set time","set month","set speed","help"}
+	showHome=True
+	arrived =False
+	commandlist = {"set time","set month","set speed","help",}
 
 	color = (120,130,130)
 	inputs = ""
 	executed = False
+	skip = False
 	step = 0
 	speed = 0
 	hour = 0
@@ -160,13 +219,13 @@ Press q to quit this instructions screen
 
 	seats = scene.seats(width,height,color)
 	windowFrame = scene.frame(width,height,color)
-	sceneryBase = landscape.land(width*2/3,height*2/3, 0,"clear")
-	plains = landscape.plain(width*2/3,height*2/3,0,"clear")
-	river = landscape.river(width*2/3,height*2/3,0,"clear",2)
-	mountains = landscape.mountains(width*2/3,height*2/3,0,"clear",1)
-	desert = landscape.desert(width*2/3,height*2/3,0,'clear')
-	hills = landscape.hills(width*2/3,height*2/3,0,'clear')
-	forest = landscape.forest(width*2/3,height*2/3,0,'clear')
+	sceneryBase = landscape.land(width*2/3,height*2/3, 0,"clear",month)
+	plains = landscape.plain(width*2/3,height*2/3,0,"clear",month)
+	river = landscape.river(width*2/3,height*2/3,0,"clear",2,month)
+	mountains = landscape.mountains(width*2/3,height*2/3,0,"clear",1,month)
+	desert = landscape.desert(width*2/3,height*2/3,0,'clear',month)
+	hills = landscape.hills(width*2/3,height*2/3,0,'clear',month)
+	forest = landscape.forest(width*2/3,height*2/3,0,'clear',month)
 
 	while(running):
 		if(not start or not end):
@@ -174,17 +233,25 @@ Press q to quit this instructions screen
 		for event in pygame.event.get():
 			if(event.type == pygame.QUIT):
 				running = False
+			elif(event.type==SONGOVER):
+				played+=playlist.pop(0)
+				if(len(playlist)==0):
+					playlist = shuffle(played)
+				pygame.mixer.music.load(playlist[0])
+				pygame.mixer.music.play()
 			elif(event.type == pygame.KEYDOWN):
 				key = pygame.key.name(event.key)
 				if(key == "/"):
 					showConsole = not showConsole
 					inputs = ""
-				if(executed):
+				elif(executed):
 					executed=False
 					inputs = ""
 				elif(showSplash):
 					if(key=='q'):
 						showSplash=False
+					if(key=='h'):
+						showHome = not showHome
 				elif(showConsole):
 					if(len(inputs)<=30):
 						if(key == "space"):
@@ -197,7 +264,6 @@ Press q to quit this instructions screen
 							inputs=inputs[:-1]
 					if(key == "return" and len(inputs)>0):
 						if(inputs=="help"):
-							print(inputs)
 							inputs =str(exeCommand(str(inputs)))
 						elif(not start):
 							startLoc = inputs
@@ -221,6 +287,9 @@ Press q to quit this instructions screen
 								times = [pygame.time.get_ticks()]
 								end = True
 								inputs = "End location saved! :D"
+								pygame.mixer.music.load(playlist[0])
+								pygame.mixer.music.play()
+
 						else:
 							inputs = str(exeCommand(str(inputs)))
 						executed = True
@@ -235,6 +304,8 @@ Press q to quit this instructions screen
 					tempKW = []
 					climateKW=[]
 					#for incrementing speed of the train
+				elif(not showConsole and key =="s"):
+					skip =True
 				if((key == "right" or key== "up") and abs(speed+10)<=50):
 					speed+=10
 					mph+=1000

@@ -3,7 +3,7 @@ import random, math
 import foliage
 
 class land(object):
-	def __init__(self,width,height,temp,weather):
+	def __init__(self,width,height,temp,weather,month):
 		self.width =width
 		self.height = height
 		self.temp = temp
@@ -12,21 +12,33 @@ class land(object):
 		self.sky0 = (220,230,205)
 		self.timeDelay = 0
 		self.speed = 0
+		self.month = month
 
-	def daylightEq(self,hour):
+	@staticmethod
+	def daylightEq(hour):
 		h =hour
 		r= .021*h**4-1.025*h**3+15.782*h**2-80.652*h
 		g=.010*h**4-.431*h**3+6.239*h**2-39.562*h
 		b = -.001*h**4+.123*h**3-2.824*h**2+10.542*h
 		return r,g,b
 
+	@staticmethod
+	def seasonsEq(month):
+		colors = [(0,0,0),(180,220,100),(130,180,40),(90,130,20),(40,80,10),(100,120,30),(180,170,60),
+				(220,170,40),(220,130,40),(220,80,40),(100,50,40),(0,0,0)]
+		return colors[month-1]
+
 	def daylight(self,hour):
-		r,g,b = self.daylightEq(hour)
+		r,g,b = land.daylightEq(hour)
+		self.grass0 = land.tint((140,190,110),land.seasonsEq(self.month))
 		self.sky = (self.sky0[0]+r,self.sky0[1]+g,self.sky0[2]+b)
 		self.grass = (self.grass0[0]+r//2,self.grass0[1]+g//2,self.grass0[2]+b//2)
 
 	def temperature(self):
 		self.hueShift = (0,0,0)
+
+	def changeMonth(self,month):
+		self.month=month
 
 	def changeSpeed(self,x):
 		self.speed+=x
@@ -41,6 +53,13 @@ class land(object):
 		for color in range(3):
 			difference = averageColor-newColor[color]
 			newColor[color]+=difference*(distance-1)/4
+		return (newColor)
+
+	@staticmethod
+	def tint(color1,color2):
+		newColor = [0,0,0]
+		for color in range(3):
+			newColor[color]=color1[color]+(color2[color]-color1[color])//4
 		return (newColor)
 
 	def draw(self,surf):
@@ -64,8 +83,8 @@ class land(object):
 		
 
 class plain(land):
-	def __init__(self,width,height,temp,weather):
-		super().__init__(width,height,temp,weather)
+	def __init__(self,width,height,temp,weather,month):
+		super().__init__(width,height,temp,weather,month)
 		self.far = []
 		self.farTreesColor0 = super().atmosphericPersp(self.grass0,1)
 		self.farPts=50
@@ -75,7 +94,7 @@ class plain(land):
 		self.mid = []
 
 	def daylight(self,hour):
-		r,g,b = self.daylightEq(hour)
+		r,g,b = land.daylightEq(hour)
 		self.farTreesColor = (self.farTreesColor0[0]+r*3//4,
 			self.farTreesColor0[1]+g*3//4,self.farTreesColor0[2]+b*3//4)
 
@@ -96,8 +115,8 @@ class plain(land):
 			self.farTreesPts(self.width+self.farSpace,1)
 
 class river(land):
-	def __init__(self,width,height,temp,weather,distance):
-		super().__init__(width,height,temp,weather)
+	def __init__(self,width,height,temp,weather,distance,month):
+		super().__init__(width,height,temp,weather,month)
 		self.distance = distance
 		self.river= []
 		self.riverPts = 6
@@ -107,7 +126,7 @@ class river(land):
 		self.riverPoints(0,self.riverPts+2)
 
 	def daylight(self,hour):
-		r,g,b = self.daylightEq(hour)
+		r,g,b = land.daylightEq(hour)
 		self.riverColor = (self.riverColor0[0]+r,
 			self.riverColor0[1]+g,self.riverColor0[2]+b)
 
@@ -136,8 +155,8 @@ class river(land):
 			self.riverPoints(self.width+self.riverSpace,1)
 			
 class mountains(land):
-	def __init__(self,width,height,temp,weather,size):
-		super().__init__(width,height,temp,weather)
+	def __init__(self,width,height,temp,weather,size,month):
+		super().__init__(width,height,temp,weather,month)
 		self.size = size
 		self.mountainsB=[]
 		self.mountainsF = []
@@ -156,7 +175,7 @@ class mountains(land):
 		self.farColor0 = super().atmosphericPersp(self.color0,2)
 
 	def daylight(self,hour):
-		r,g,b = self.daylightEq(hour)
+		r,g,b = land.daylightEq(hour)
 		self.color = (self.color0[0]+r//3,
 			self.color0[1]+g//3,self.color0[2]+b//3)
 		self.farColor = (self.farColor0[0]+r*3//5,
@@ -209,20 +228,20 @@ class mountains(land):
 						self.mountainSpaceB,self.width+self.mountainSpaceB,1)
 
 class desert(land):
-	def __init__(self,width,height,temp,weather):
-		super().__init__(width,height,temp,weather)
+	def __init__(self,width,height,temp,weather,month):
+		super().__init__(width,height,temp,weather,month)
 		self.grass0 = (180,150,90)
 
 
 	def daylight(self,hour):
-		r,g,b = self.daylightEq(hour)
+		r,g,b = land.daylightEq(hour)
 		self.grass = (self.grass0[0]+r//3,
 			self.grass0[1]+g//3,self.grass0[2]+b//3)
 		self.sky = (self.sky0[0]+r,self.sky0[1]+g,self.sky0[2]+b)
 
 class hills(land):
-	def __init__(self,width,height,temp,weather):
-		super().__init__(width,height,temp,weather)
+	def __init__(self,width,height,temp,weather,month):
+		super().__init__(width,height,temp,weather,month)
 		self.hillsF,self.hillsB=[],[]
 		self.hillNumber = 3
 		self.BNumber = 2
@@ -245,7 +264,9 @@ class hills(land):
 		return y
 
 	def daylight(self,hour):
-		r,g,b = self.daylightEq(hour)
+		r,g,b = land.daylightEq(hour)
+		self.grass0 = land.tint((165,215,135),land.seasonsEq(self.month))
+		self.farColor0 = land.tint((190,240,160),land.seasonsEq(self.month))
 		self.grass = (self.grass0[0]+r*2//3,
 			self.grass0[1]+g*2//3,self.grass0[2]+b*2//3)
 		self.farColor = (self.farColor0[0]+r*4//5,
@@ -282,8 +303,8 @@ class hills(land):
 						self.hillSpaceB,self.width+2*self.hillSpaceB,1)
 
 class lake(land): 
-	def __init__(self,width,height,temp,weather):
-		super().__init__(width,height,temp,weather)
+	def __init__(self,width,height,temp,weather,month):
+		super().__init__(width,height,temp,weather,month)
 		self.lake = []
 		self.lakeColor0 = (220,230,205)
 		self.lakeSpace = 2*width
@@ -292,7 +313,7 @@ class lake(land):
 		self.lakePts()
 
 	def daylight(self,hour):
-		r,g,b = self.daylightEq(hour)
+		r,g,b = land.daylightEq(hour)
 		self.lakeColor = (self.lakeColor0[0]+r,self.lakeColor0[1]+g,self.lakeColor0[2]+b)
 
 	def lakePts(self):
@@ -314,28 +335,32 @@ class lake(land):
 
 #TODO make less ratchet looking trees lol
 class forest(land):
-	def __init__(self,width,height,temp,weather):
-		super().__init__(width,height,temp,weather)
+	def __init__(self,width,height,temp,weather,month):
+		super().__init__(width,height,temp,weather,month)
 		self.forest = []
 		self.trunk0 = (70,50,30)
-		self.leaves0 = (50,70,40)
+		self.leaves0 = land.seasonsEq(self.month)
 		self.trees = 2
 		self.treePts = 20
 		self.forestTime = 30
 		self.forestSpace = self.width//self.trees
+		self.trunk,self.leaves=self.trunk0,self.leaves0
 		self.forestPts(0,self.trees+1)
 
 	def daylight(self,hour):
-		r,g,b = self.daylightEq(hour)
-		self.trunk = (self.trunk0[0]+r//3,self.trunk0[1]+g//3,self.trunk0[2]+b//3)
-		self.leaves = (self.leaves0[0]+r//3,self.leaves0[1]+g//3,self.leaves0[2]+b//3)
+		r,g,b = land.daylightEq(hour)
+		self.leaves0= land.seasonsEq(self.month)
+		self.leaves = (self.leaves0[0]+r//3,self.leaves0[1]+g//5,self.leaves0[2]+b//3)
+		if(self.leaves[0]<0):self.leaves=(0,self.leaves0[1],self.leaves0[2])
+		if(self.leaves[1]<0):self.leaves=(self.leaves0[0],0,self.leaves0[2])
+		if(self.leaves[2]<0):self.leaves=(self.leaves0[0],self.leaves0[1],0)
 
 	def forestPts(self,start,times):
 		start+=self.forestSpace//2
 		w,h = self.width,self.height
 		for tree in range(times):
 			x = start+self.forestSpace*tree
-			self.forest.append(foliage.tree4(w,h,x,h,self.trunk0,self.leaves0,1))
+			self.forest.append(foliage.tree4(w,h,x,h,self.trunk,self.leaves,1))
 
 	# def forestPts(self,start,times):
 	# 	start+=self.forestSpace//2
@@ -375,7 +400,7 @@ class forest(land):
 
 	def draw(self,surf):
 		self.animate(surf,
-						self.forest,self.trunk0,self.leaves0,self.forestSpace,self.forestTime)
+						self.forest,self.trunk,self.leaves,self.forestSpace,self.forestTime)
 		if(self.forest[1][0][2]<0):
 			self.forest.pop(0)
 			self.forestPts(self.width,1)
@@ -385,14 +410,14 @@ if __name__ == '__main__':
 	pygame.init()
 	screen = pygame.display.set_mode((width,height))
 	pygame.display.set_caption("land")
-	base = land(width,height,0,"clear")
-	testPlain = plain(width,height,0,"clear")
-	# testDesert = desert(width,height,0,"clear")
-	testRiver = river(width,height,0,"clear",3)
-	testmountains = mountains(width,height,0,"clear",1)
-	testHills = hills(width,height,0,"clear")
-	testLakes = lake(width,height,0,"clear")
-	testForest = forest(width,height,0,"clear")
+	base = land(width,height,0,"clear",9)
+	testPlain = plain(width,height,0,"clear",6)
+	# testDesert = desert(width,height,0,"clear",6)
+	testRiver = river(width,height,0,"clear",3,6)
+	testmountains = mountains(width,height,0,"clear",1,6)
+	testHills = hills(width,height,0,"clear",9)
+	testLakes = lake(width,height,0,"clear",6)
+	testForest = forest(width,height,0,"clear",6)
 	running = True
 	while running:
 		for event in pygame.event.get():

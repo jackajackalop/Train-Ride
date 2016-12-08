@@ -8,12 +8,14 @@ import math,random
 
 
 def tree4(w,h,x,y,trunk,leaves,distance):
-
 	treePts = []
 	def drawTree(**p):
 		if p['depth'] < p['maxdepth']:
-			if(p['height']<h//13): p['color']=p['leaves']
-			if p['height'] <1:return
+			if(leaves==(0,0,0)):
+				p['maxdepth']=3
+			else: 
+				if(p['height']<h//13): p['color']=p['leaves']
+				if p['height'] <1:return
 
 			dep = p['depth']
 			p['width'] *= (p['dwidth'](dep))
@@ -81,21 +83,6 @@ def tree4(w,h,x,y,trunk,leaves,distance):
 			 maxdepth = 7
 			)
 	return treePts
-
-# class shrub(trees):
-# 	def __init__(self,surf,color,location,size):
-# 		super().__init__(surf,color,location,size)
-
-# 	def draw(self):
-# 		pass
-
-# class deciduous(trees):
-# 	def __init__(self,surf,color,location,size):
-# 		super().__init__(surf,color,location,size)
-
-# class pine(trees):
-# 	def __init__(self,surf,color,location,size):
-# 		super().__init__(surf,color,location,size)
 
 if __name__ == '__main__':
 	width,height = 800,600
