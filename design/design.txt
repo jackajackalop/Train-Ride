@@ -1,0 +1,34 @@
+The goal of my project was to make a train ride simulator that would use 
+webscraping to obtain information on a train route and then conitnuously
+generate scenery suitable for the route.
+
+My design uses a main function that calls a modules for generating various 
+scenery, webscraping, and drawing the train compartment. Each physcial 
+landscape features is a subclass that inherits from the class "land". Within 
+each class are functions to generate the points that will be drawn for each 
+geographical feature. The class "land" contains the functions to shift the 
+scenery across the window, process certain user inputs, calculate color change 
+due to atmospheric perspective, calculate color changes due to changing time 
+of day, and select foliage color based on month of the year. The color of the 
+sky as the sun rises and sets is calculated using quartic functions for each 
+component of rgb in terms of the time, and the color also affects the color of 
+all other features of the landscape. Trees are drawn using the code for 
+"Tree4" from Hermit's git repository (https://github.com/LingDong-/Hermit), 
+modified slightly to draw leaves based on the season.
+
+To obtain information on the physical geography of an area along the route, I 
+use two methods of webscraping. One function takes the html form of the 
+wikipedia page for a certain location and looks for keywords. The other method 
+uses Google Places API, and searches for keywords within points of interest 
+around certain points with the filter "natural feature". To obtain travel 
+information, such as travel times, travel route, and whether or not a route by 
+train is even possible between two points I use Google Directions API, and a 
+recurive function that I wrote to help process and filter the information 
+returned by the API.
+
+I tried to keep my user interface simple and relatively appealing 
+aesthetically. I wanted it to not interfere with the visuals of the program 
+overall while also providing some clarity on how the program is to be used. 
+The only similar program I was able to find online was a train simulator game 
+that focussed on driving a train. The graphics were terrible, and there were 
+very little instructions, so I sought to address that in my program. 

@@ -344,5 +344,4 @@ Press q to quit this instructions screen
 		statusUpdate()
 	pygame.quit()
 
-
 trainStart()
