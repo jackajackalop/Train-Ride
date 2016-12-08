@@ -8,7 +8,7 @@ class compartment(object):
 		self.lvx,self.lvy = -.25*width,.6*height#left vanishing point for 2pt perspective
 		self.rvx,self.rvy = 4.5*width,.6*height#left vanishing point for 2pt perspective
 
-	def shake(self):
+	def shake(self,pts):
 		pass
 	def colorChange(self,change):
 		newColor = list(self.color)
@@ -25,40 +25,43 @@ class compartment(object):
 class seats(compartment):
 	def __init__(self,width,height,color):
 		super().__init__(width,height,color)
-
-
-	def draw(self,surf):
-		w,h = self.width,self.height
-		surf.fill(self.color)
-		#couch and walls
-		couchBase = self.colorChange(30)
-		otherWall = self.colorChange(-20)
-		pygame.draw.rect(surf,otherWall,(0,0,w*2/3+20,h))
-		shadow = self.colorChange(-35)
-		pygame.draw.rect(surf,shadow,(w/2+40,self.perspective('l',w/2,
+		w,h=width,height
+		self.wall =[0,0,w*2/3+20,h]
+		self.underSeat = [w/2+40,self.perspective('l',w/2,
 							self.perspective('r',w*2/3,
 							self.perspective('l',w,h*3/4,w*2/3),w/2)+h*.04,w/2+40),
-										w,h))
-		pygame.draw.polygon(surf,couchBase,[[w*2/3,h*.4], 
+										w,h]
+		self.couchBack = [[w*2/3,h*.4], 
 							[w,self.perspective('l',w*2/3,h*.4,w)],
 							[w,h*.8], 
-							[w*2/3,self.perspective('l',w,h*.8,w*2/3)]])
-		couchSeat=self.colorChange(50)
-		pygame.draw.polygon(surf,couchSeat, 
-							[[w*2/3,self.perspective('l',w,h*3/4,w*2/3)],
+							[w*2/3,self.perspective('l',w,h*.8,w*2/3)]]
+		self.couchSeat = [[w*2/3,self.perspective('l',w,h*3/4,w*2/3)],
 							[w,self.perspective('l',w*2/3,
 									self.perspective('l',w,h*3/4,w*2/3),w)],
 							[w,self.perspective('l',w/2,self.perspective('r',w*2/3,
 									self.perspective('l',w,h*3/4,w*2/3),w/2),w)], 
-							[w/2,self.perspective('r',w*2/3,self.perspective('l',w,h*3/4,w*2/3),w/2)]])
-		pygame.draw.polygon(surf,couchBase,
-							[[w/2,self.perspective('r',w*2/3,self.perspective('l',w,h*3/4,w*2/3),w/2)],
+							[w/2,self.perspective('r',w*2/3,self.perspective('l',w,h*3/4,w*2/3),w/2)]]
+		self.couchSeatFront = [[w/2,self.perspective('r',w*2/3,self.perspective('l',w,h*3/4,w*2/3),w/2)],
 							[w,self.perspective('l',w/2,self.perspective('r',w*2/3,
 									self.perspective('l',w,h*3/4,w*2/3),w/2),w)],
 							[w,self.perspective('l',w/2,self.perspective('r',w*2/3,
 								self.perspective('l',w,h*3/4,w*2/3),w/2)+h*.04,w)],
 							[w/2,self.perspective('l',w,self.perspective('l',w/2,self.perspective('r',w*2/3,
-								self.perspective('l',w,h*3/4,w*2/3),w/2)+h*.04,w),w/2)]])
+								self.perspective('l',w,h*3/4,w*2/3),w/2)+h*.04,w),w/2)]]
+
+
+	def draw(self,surf):
+		w,h = self.width,self.height
+		surf.fill(self.color)
+		couchBase = self.colorChange(30)
+		otherWall = self.colorChange(-20)
+		shadow = self.colorChange(-35)
+		couchSeatColor=self.colorChange(50)
+		pygame.draw.rect(surf,otherWall,self.wall)
+		pygame.draw.rect(surf,shadow,self.underSeat)
+		pygame.draw.polygon(surf,couchBase,self.couchBack)
+		pygame.draw.polygon(surf,couchSeatColor, self.couchSeat)
+		pygame.draw.polygon(surf,couchBase,self.couchSeatFront)
 
 class frame(compartment):
 	def draw(self,surf):

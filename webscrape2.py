@@ -1,6 +1,7 @@
 import json
 import googlemaps
-import googleplaces
+import googleplaces 
+#used python wrapper for using google places api found here https://github.com/slimkrazy/python-google-places
 from geolocation.main import GoogleMaps
 import requests
 import webscrape

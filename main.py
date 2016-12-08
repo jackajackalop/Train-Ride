@@ -135,33 +135,34 @@ Press q to quit this instructions screen
 				arrived=True
 
 	def exeCommand(command):
-		nonlocal speed, month,showSplash,showConsole
+		nonlocal speed, month,showSplash,showConsole,timeChange
 		failed = "Not Executed! :("
 		noSpace = command.lower().split()
 		months =["january","february","march","april","may","june",
 		"july","august","september","october","november","december"]
-		try:
-			if(command=="help"):
-				showConsole=False
-				showSplash=True
-				showHome=False
+		# try:
+		if(command=="help"):
+			showConsole=False
+			showSplash=True
+			showHome=False
+		else:
+			commandType = noSpace[0]+" "+noSpace[1]
+			amount = noSpace[2]
+			if(commandType not in commandlist):
+				return failed
 			else:
-				commandType = noSpace[0]+" "+noSpace[1]
-				amount = noSpace[2]
-				if(commandType not in commandlist):
-					return failed
-				else:
-					if(commandType == "set speed"):
-						speed = int(noSpace[2])
-					elif(commandType == "set month"):
-						if(not amount.isdigit()):
-							amount = months.index(amount)+1
-						month = int(amount)
-						monthChange()
-
+				if(commandType == "set speed"):
+					speed = int(amount)
+				elif(commandType == "set month"):
+					if(not amount.isdigit()):
+						amount = months.index(amount)+1
+					month = int(amount)
+					monthChange()
+				elif(commandType == "set time"):
+					timeChange=hour-int(amount)
 			return "Executed :D"
-		except:
-			return failed
+		# except:
+		# 	return failed
 
 	def queueMusic(path):
 		music = []
@@ -200,6 +201,7 @@ Press q to quit this instructions screen
 	step = 0
 	speed = 0
 	hour = 0
+	timeChange=0
 	month = 6
 	mph = 500
 	start,end=False,False
@@ -320,7 +322,7 @@ Press q to quit this instructions screen
 					river.changeSpeed(-10)
 					mountains.changeSpeed(-10)
 					forest.changeSpeed(-10)
-		hour = (pygame.time.get_ticks()/(2000-speed*10))%24
+		hour = ((pygame.time.get_ticks()/(2000-speed*10))%24+timeChange)%24
 		daylightChange()
 		draw()
 		drawSplash()

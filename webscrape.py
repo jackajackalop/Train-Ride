@@ -1,11 +1,6 @@
 import pygame
 import requests
 
-"""
-probably not algorithmically complex enough. Maybe change so it looks at surrounding regions too given a city? 
-or searches other websites too other than wikipedia lol
-"""
-
 def infoGrab(city):
 	info = requests.get("https://en.wikipedia.org/wiki/"+city)
 	info = info.text
